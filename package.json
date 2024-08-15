@@ -1,0 +1,20 @@
+{
+  "name": "hayvan_sahiplendirme",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000H\u0000a\u0000y\u0000v\u0000a\u0000n\u0000_\u0000s\u0000a\u0000h\u0000i\u0000p\u0000l\u0000e\u0000n\u0000d\u0000i\u0000r\u0000m\u0000e\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "nodemailer": "^6.9.14"
+  }
+}

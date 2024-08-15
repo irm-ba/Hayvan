@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Replace with your actual values -->
+    <string name="google_app_id">1:347423456853:android:d58b95f64b8b6f543e5edc</string>
+    <string name="firebase_database_url">https://felvera37.firebaseio.com</string>
+    <string name="gcm_defaultSenderId">347423456853</string>
+    <string name="google_storage_bucket">felvera37.appspot.com</string>
+    <string name="project_id">felvera37</string>
+    <string name="google_api_key">AIzaSyBXO9OdTQOG2LxYMzype8TGydpZCaxIa1Q</string>
+    <string name="firebase_application_id">1:347423456853:android:d58b95f64b8b6f543e5edc</string>
+</resources>

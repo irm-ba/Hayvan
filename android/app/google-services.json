@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "347423456853",
+    "project_id": "felvera37",
+    "storage_bucket": "felvera37.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:347423456853:android:d58b95f64b8b6f543e5edc",
+        "android_client_info": {
+          "package_name": "com.example.pet_adoption"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXO9OdTQOG2LxYMzype8TGydpZCaxIa1Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
