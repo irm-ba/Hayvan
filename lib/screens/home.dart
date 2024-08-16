@@ -79,7 +79,7 @@ class _HomeState extends State<Home> {
               ),
               Divider(), // Bölüm çizgisi ekliyoruz
               ListTile(
-                leading: Icon(Icons.accessibility_new_sharp),
+                leading: Icon(Icons.logout_rounded),
                 title: Text('Çıkış yap'),
                 onTap: () {
                   Navigator.push(

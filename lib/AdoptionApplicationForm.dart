@@ -5,9 +5,11 @@ import 'package:uuid/uuid.dart';
 
 class AdoptionApplicationForm extends StatefulWidget {
   final String petOwnerId;
+  final String petId; // Add petId parameter
 
   AdoptionApplicationForm({
     required this.petOwnerId,
+    required this.petId, // Initialize petId
   });
 
   @override
@@ -210,7 +212,7 @@ class _AdoptionApplicationFormState extends State<AdoptionApplicationForm> {
         final String userId =
             FirebaseAuth.instance.currentUser?.uid ?? _uuid.v4();
         final String petOwnerId = widget.petOwnerId;
-        final String petId = _uuid.v4(); // UUID ile yeni pet ID'si oluştur
+        final String petId = widget.petId; // Use petId from widget
 
         DocumentReference docRef =
             _firestore.collection('adoption_applications').doc(applicationId);
@@ -219,7 +221,7 @@ class _AdoptionApplicationFormState extends State<AdoptionApplicationForm> {
           'applicationId': applicationId,
           'userId': userId,
           'petOwnerId': petOwnerId,
-          'petId': petId, // UUID ile oluşturulmuş pet ID'si
+          'petId': petId, // Use petId from widget
           'name': name,
           'phone': phone,
           'email': email,

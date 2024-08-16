@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pet_adoption/adminaplication.dart';
 import 'package:pet_adoption/models/pet_data.dart';
 import 'EditProfile.dart';
 import 'change_password_page.dart';
@@ -247,6 +248,45 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
+  Widget _buildPetsList() {
+    return Container(
+      height: 200,
+      child: ListView.builder(
+        itemCount: _userPets.length,
+        itemBuilder: (context, index) {
+          var pet = _userPets[index];
+          return Card(
+            margin: EdgeInsets.symmetric(vertical: 8.0),
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            child: ListTile(
+              contentPadding: EdgeInsets.all(12.0),
+              leading: CircleAvatar(
+                radius: 30,
+                backgroundImage: NetworkImage(pet.imageUrl),
+              ),
+              title: Text(
+                pet.name ?? 'Hayvan Adı',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16.0,
+                ),
+              ),
+              subtitle: Text(
+                pet.breed ?? 'Irk belirtilmemiş',
+                style: TextStyle(
+                  color: Colors.black54,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -268,104 +308,69 @@ class _AccountPageState extends State<AccountPage> {
         itemCount: _userApplications.length,
         itemBuilder: (context, index) {
           var application = _userApplications[index];
-          return Card(
-            margin: EdgeInsets.symmetric(vertical: 8.0),
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            child: ListTile(
-              contentPadding: EdgeInsets.all(12.0),
-              leading: Icon(Icons.pets, color: Colors.purple),
-              title: Text(
-                application['adoptionReason'] ?? 'Neden belirtilmemiş',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16.0,
-                ),
-              ),
-              subtitle: Text(
-                application['petId'] ?? 'Hayvan ID belirtilmemiş',
-                style: TextStyle(
-                  color: Colors.black54,
-                ),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        ApplicationDetailPage(applicationId: application.id),
-                  ),
-                );
-              },
-            ),
-          );
-        },
-      ),
-    );
-  }
+          String userId = application['userId'];
+          String petId = application['petId'];
 
-  Widget _buildPetsList() {
-    return Container(
-      height: 220,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: _userPets.length,
-        separatorBuilder: (context, index) => SizedBox(width: 10),
-        itemBuilder: (context, index) {
-          var pet = _userPets[index];
-          return Card(
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20.0),
-                    topRight: Radius.circular(20.0),
+          return FutureBuilder<List<dynamic>>(
+            future: Future.wait([
+              FirebaseFirestore.instance.collection('users').doc(userId).get(),
+              FirebaseFirestore.instance.collection('pet').doc(petId).get(),
+            ]),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              }
+              if (!snapshot.hasData || snapshot.data == null) {
+                return Text('Data not found');
+              }
+
+              var userDoc = snapshot.data![0] as DocumentSnapshot;
+              var petDoc = snapshot.data![1] as DocumentSnapshot;
+
+              String applicantName =
+                  userDoc['firstName'] ?? 'Name not provided';
+              String petName = petDoc['name'] ?? 'Pet Name';
+              String petImageUrl =
+                  petDoc['imageUrl'] ?? 'https://via.placeholder.com/150';
+
+              return Card(
+                margin: EdgeInsets.symmetric(vertical: 8.0),
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                child: ListTile(
+                  contentPadding: EdgeInsets.all(12.0),
+                  leading: CircleAvatar(
+                    radius: 30,
+                    backgroundImage: NetworkImage(petImageUrl),
                   ),
-                  child: Container(
-                    width: 160,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: NetworkImage(
-                          pet.imageUrl ?? 'https://via.placeholder.com/150',
-                        ),
-                        fit: BoxFit.cover,
-                      ),
+                  title: Text(
+                    '$applicantName - $petName',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0,
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        pet.name ?? 'Hayvan Adı',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        pet.breed ?? 'Irk belirtilmemiş',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
+                  subtitle: Text(
+                    application['adoptionReason'] ?? 'Reason not provided',
+                    style: TextStyle(
+                      color: Colors.black54,
+                    ),
                   ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AdminApplication(
+                          applicationId: application.id,
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              ],
-            ),
+              );
+            },
           );
         },
       ),
@@ -445,21 +450,5 @@ class _HeaderPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return false;
-  }
-}
-
-class ApplicationDetailPage extends StatelessWidget {
-  final String applicationId;
-
-  const ApplicationDetailPage({Key? key, required this.applicationId})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text('Başvuru ID: $applicationId'),
-      ),
-    );
   }
 }

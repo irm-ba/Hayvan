@@ -78,7 +78,8 @@ class _ForumPageState extends State<ForumPage> {
                               children: [
                                 CircleAvatar(
                                   backgroundColor: Colors.white,
-                                  child: Icon(Icons.question_answer, color: Color(0xFFC478D1)),
+                                  child: Icon(Icons.question_answer,
+                                      color: Color(0xFFC478D1)),
                                 ),
                                 SizedBox(width: 12),
                                 Expanded(
@@ -94,7 +95,8 @@ class _ForumPageState extends State<ForumPage> {
                               ],
                             ),
                             SizedBox(height: 12),
-                            if (data['imageUrls'] != null && (data['imageUrls'] as List).isNotEmpty)
+                            if (data['imageUrls'] != null &&
+                                (data['imageUrls'] as List).isNotEmpty)
                               SizedBox(
                                 height: 100,
                                 child: ListView.builder(
@@ -102,7 +104,8 @@ class _ForumPageState extends State<ForumPage> {
                                   itemCount: (data['imageUrls'] as List).length,
                                   itemBuilder: (context, index) {
                                     return Padding(
-                                      padding: const EdgeInsets.only(right: 8.0),
+                                      padding:
+                                          const EdgeInsets.only(right: 8.0),
                                       child: Image.network(
                                         data['imageUrls'][index],
                                         fit: BoxFit.cover,

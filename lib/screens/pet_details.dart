@@ -76,8 +76,7 @@ class PetDetailsScreen extends StatelessWidget {
                     buildNoHealthCardMessage(),
                   SizedBox(height: 24),
                   Center(
-                    child: buildAdoptionButton(
-                        context, petOwnerId), // Parametreyi geçin
+                    child: buildAdoptionButton(context, petOwnerId),
                   ),
                 ],
               ),
@@ -222,6 +221,7 @@ class PetDetailsScreen extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) => AdoptionApplicationForm(
                 petOwnerId: petOwnerId,
+                petId: pet.petId, // Pet ID'sini geçin
               ),
             ),
           );

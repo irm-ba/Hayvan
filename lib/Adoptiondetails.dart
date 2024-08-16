@@ -198,7 +198,7 @@ class InfoRow extends StatelessWidget {
           Expanded(
             flex: 3,
             child: Text(
-              value ?? 'Bilinmiyor',
+              value ?? 'Beklemede',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.black87,

@@ -18,7 +18,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
   Widget build(BuildContext context) {
     List<IconData> icons = [
       Icons.home,
-      Icons.notifications,
+      Icons.local_hospital_rounded,
       Icons.add, // Ortadaki artı ikonu
 
       Icons.list,
