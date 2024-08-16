@@ -4,13 +4,12 @@ import 'package:pet_adoption/Contact.dart';
 import 'package:pet_adoption/constants.dart';
 import 'package:pet_adoption/account.dart';
 import 'package:pet_adoption/models/pet_data.dart';
-import 'package:pet_adoption/settings.dart';
 import 'package:pet_adoption/aboutpage.dart';
 import 'package:pet_adoption/widgets/CustomBottomNavigationBar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/pet_grid_list.dart';
-import '../Contact.dart';
 import '../login.dart';
+import '../forum.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -55,16 +54,6 @@ class _HomeState extends State<Home> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => AccountPage()),
-                  );
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.settings),
-                title: Text('Ayarlar'),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SettingsPage()),
                   );
                 },
               ),
@@ -124,11 +113,21 @@ class _HomeState extends State<Home> {
             child: Text('Felvera'),
           ),
           actions: [
-            IconButton(
-              icon: Icon(Icons.filter_list),
-              onPressed: () {
-                _showFilterDialog();
-              },
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: 8.0), // İkon ve yazı arasında boşluk
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.filter_list),
+                    onPressed: () {
+                      _showFilterDialog();
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -140,39 +139,43 @@ class _HomeState extends State<Home> {
               child: Row(
                 children: [
                   _buildCategoryButton('Tüm İlanlar'),
-                  _buildCategoryButton('Kedi İlanları'),
                   _buildCategoryButton('Kayıp İlanları'),
                   _buildCategoryButton('Köpek İlanları'),
+                  _buildCategoryButton('Forum'), // Forum seçeneğini ekliyoruz
                 ],
               ),
             ),
             const SizedBox(height: 24),
 
-            /// Pet List
+            /// Pet List or Forum Page
             Expanded(
-              child: StreamBuilder(
-                stream: _getCategoryStream(selectedCategory),
-                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(
-                        child: Text('Hata oluştu: ${snapshot.error}'));
-                  }
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return Center(child: Text('Hiç hayvan bulunamadı.'));
-                  }
+              child: selectedCategory == 'Forum'
+                  ? ForumPage() // Forum sayfasını gösterecek
+                  : StreamBuilder(
+                      stream: _getCategoryStream(selectedCategory),
+                      builder:
+                          (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        }
+                        if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Hata oluştu: ${snapshot.error}'));
+                        }
+                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          return Center(child: Text('Hiç hayvan bulunamadı.'));
+                        }
 
-                  // Firestore'dan gelen verileri PetData listesine dönüştürme
-                  List<PetData> pets =
-                      snapshot.data!.docs.map((DocumentSnapshot doc) {
-                    return PetData.fromSnapshot(doc);
-                  }).toList();
+                        // Firestore'dan gelen verileri PetData listesine dönüştürme
+                        List<PetData> pets =
+                            snapshot.data!.docs.map((DocumentSnapshot doc) {
+                          return PetData.fromSnapshot(doc);
+                        }).toList();
 
-                  return PetGridList(pets: pets);
-                },
-              ),
+                        return PetGridList(pets: pets);
+                      },
+                    ),
             ),
           ],
         ),

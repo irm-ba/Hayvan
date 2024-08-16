@@ -74,59 +74,60 @@ class _EditProfilePageState extends State<EditProfilePage> {
       body: _userData == null
           ? Center(child: CircularProgressIndicator())
           : Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextFormField(
-                controller: _firstNameController,
-                decoration: InputDecoration(labelText: 'Ad'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Bu alan boş bırakılamaz';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _lastNameController,
-                decoration: InputDecoration(labelText: 'Soyad'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Bu alan boş bırakılamaz';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _phoneNumberController,
-                decoration: InputDecoration(labelText: 'Telefon Numarası'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Bu alan boş bırakılamaz';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _bioController,
-                decoration: InputDecoration(labelText: 'Biyografi'),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _saveProfile,
-                child: Text('Değişiklikleri Kaydet'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
-                  foregroundColor: Colors.white,
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextFormField(
+                      controller: _firstNameController,
+                      decoration: InputDecoration(labelText: 'Ad'),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Bu alan boş bırakılamaz';
+                        }
+                        return null;
+                      },
+                    ),
+                    TextFormField(
+                      controller: _lastNameController,
+                      decoration: InputDecoration(labelText: 'Soyad'),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Bu alan boş bırakılamaz';
+                        }
+                        return null;
+                      },
+                    ),
+                    TextFormField(
+                      controller: _phoneNumberController,
+                      decoration:
+                          InputDecoration(labelText: 'Telefon Numarası'),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Bu alan boş bırakılamaz';
+                        }
+                        return null;
+                      },
+                    ),
+                    TextFormField(
+                      controller: _bioController,
+                      decoration: InputDecoration(labelText: 'Biyografi'),
+                    ),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _saveProfile,
+                      child: Text('Değişiklikleri Kaydet'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 

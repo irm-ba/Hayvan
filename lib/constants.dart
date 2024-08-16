@@ -15,9 +15,3 @@ const kLinearGradient = LinearGradient(
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
 );
-
-const kDummyProfilePicUrl =
-    'https://images.unsplash.com/photo-1599842057874-37393e9342df?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
-
-const kDummyDescription =
-    "Bu kedi sakin ve dost canlısıdır. İnsanlarla iyi geçinir ve evde dinlenmeyi sever. Sahiplenmek isteyenlerin ona sevgi dolu bir ev sunabileceklerinden emin olmaları önemlidir. Kedinin düzenli bakım ve veteriner kontrolleri gereklidir.";

@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -10,7 +11,10 @@ class ApplicationDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Başvuru Detayı'),
+        title: Text(
+          'Başvuru Detayı',
+          style: TextStyle(color: Colors.white), // Başlık rengi beyaz
+        ),
         backgroundColor: Colors.purple[800],
       ),
       body: FutureBuilder<DocumentSnapshot>(

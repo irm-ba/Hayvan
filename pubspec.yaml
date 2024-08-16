@@ -24,6 +24,7 @@ dependencies:
   http: ^1.2.2
   mailer: ^6.0.0
   uuid: ^3.0.0
+ 
 
 dev_dependencies:
   flutter_test:

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:pet_adoption/models/pet_data.dart';
 import 'EditProfile.dart';
 import 'change_password_page.dart';
@@ -74,7 +75,15 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Future<void> _pickImage() async {
-    // Burada, kullanıcının profil resmini seçmesini sağlayın
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
+      });
+      await _uploadImageToFirebaseAndSaveUrl();
+    }
   }
 
   Future<void> _uploadImageToFirebaseAndSaveUrl() async {
@@ -97,93 +106,119 @@ class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.purple),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text(
-          'Hesap',
-          style: TextStyle(
-            color: Colors.purple,
-            fontWeight: FontWeight.bold,
-          ),
+      body: Stack(
+        children: [
+          _buildBackground(),
+          _userData == null
+              ? Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildCustomBackButton(),
+                      SizedBox(height: 200),
+                      _buildProfileHeader(),
+                      _buildProfileDetails(),
+                      _buildActionButtons(),
+                    ],
+                  ),
+                ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBackground() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color.fromARGB(255, 173, 121, 179),
+            Color.fromARGB(255, 202, 121, 243)
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
       ),
-      body: _userData == null
-          ? Center(child: CircularProgressIndicator())
-          : Container(
-              color: Colors.white,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildProfileHeader(),
-                  Expanded(child: _buildProfileDetails()),
-                  _buildActionButtons(),
-                ],
-              ),
-            ),
+      child: CustomPaint(
+        painter: _HeaderPainter(),
+        child: Container(height: 300),
+      ),
+    );
+  }
+
+  Widget _buildCustomBackButton() {
+    return Positioned(
+      top: 40, // Yükseklik ayarı
+      left: 16, // Sol konum
+      child: IconButton(
+        icon: Icon(Icons.arrow_back, color: Colors.white),
+        onPressed: () {
+          Navigator.pop(context); // Geri tuşuna basıldığında geri dön
+        },
+      ),
     );
   }
 
   Widget _buildProfileHeader() {
-    return Container(
-      padding: EdgeInsets.all(15.0), // Reduced padding
-      decoration: BoxDecoration(
-        color: Colors.purple[50],
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
           GestureDetector(
             onTap: _pickImage,
-            child: CircleAvatar(
-              radius: 50, // Reduced radius
-              backgroundColor: Colors.white,
-              backgroundImage: _profileImage != null
-                  ? FileImage(_profileImage!)
-                  : NetworkImage(_userData!['profileImageUrl'] ??
-                      'https://via.placeholder.com/150') as ImageProvider,
-              child: _profileImage == null
-                  ? Icon(Icons.camera_alt,
-                      color: Colors.purple, size: 30) // Adjusted icon size
-                  : null,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Color.fromARGB(255, 255, 252, 252),
+                  child: CircleAvatar(
+                    radius: 45,
+                    backgroundImage: _profileImage != null
+                        ? FileImage(_profileImage!)
+                        : NetworkImage(_userData!['profileImageUrl'] ??
+                            'https://via.placeholder.com/150') as ImageProvider,
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.purple,
+                      shape: BoxShape.circle,
+                    ),
+                    child:
+                        Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                  ),
+                ),
+              ],
             ),
           ),
-          SizedBox(height: 15), // Reduced space between image and text
+          SizedBox(height: 20),
           Text(
             _userData!['firstName'] ?? 'Kullanıcı Adı',
             style: TextStyle(
-              fontSize: 22, // Slightly smaller text size
+              fontSize: 26,
               fontWeight: FontWeight.bold,
               color: Colors.purple,
             ),
           ),
-          SizedBox(height: 6),
+          SizedBox(height: 4),
           Text(
             FirebaseAuth.instance.currentUser?.email ?? '',
             style: TextStyle(
-              fontSize: 14, // Slightly smaller text size
-              color: Colors.purple[300],
+              fontSize: 16,
+              color: Colors.purple,
             ),
           ),
-          SizedBox(height: 6),
+          SizedBox(height: 4),
           Text(
             _userData!['phoneNumber'] ?? 'Telefon numarası yok',
             style: TextStyle(
-              fontSize: 14, // Slightly smaller text size
-              color: Colors.purple[300],
+              fontSize: 16,
+              color: Colors.purple,
             ),
           ),
         ],
@@ -192,28 +227,11 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Widget _buildProfileDetails() {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(16.0),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Bio',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.purple,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            _userData!['bio'] ?? 'Bio bulunmuyor',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.black87,
-            ),
-          ),
-          SizedBox(height: 20),
           _buildSectionTitle('Başvurularım'),
           _userApplications.isNotEmpty
               ? _buildApplicationsList()
@@ -223,6 +241,7 @@ class _AccountPageState extends State<AccountPage> {
           _userPets.isNotEmpty
               ? _buildPetsList()
               : Center(child: Text('Hayvanınız bulunmuyor')),
+          SizedBox(height: 40),
         ],
       ),
     );
@@ -234,7 +253,7 @@ class _AccountPageState extends State<AccountPage> {
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 18,
+          fontSize: 20,
           fontWeight: FontWeight.bold,
           color: Colors.purple,
         ),
@@ -249,18 +268,11 @@ class _AccountPageState extends State<AccountPage> {
         itemCount: _userApplications.length,
         itemBuilder: (context, index) {
           var application = _userApplications[index];
-          return Container(
+          return Card(
             margin: EdgeInsets.symmetric(vertical: 8.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-              ],
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
             ),
             child: ListTile(
               contentPadding: EdgeInsets.all(12.0),
@@ -269,7 +281,7 @@ class _AccountPageState extends State<AccountPage> {
                 application['adoptionReason'] ?? 'Neden belirtilmemiş',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 14.0,
+                  fontSize: 16.0,
                 ),
               ),
               subtitle: Text(
@@ -300,33 +312,30 @@ class _AccountPageState extends State<AccountPage> {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: _userPets.length,
-        separatorBuilder: (context, index) => SizedBox(width: 16),
+        separatorBuilder: (context, index) => SizedBox(width: 10),
         itemBuilder: (context, index) {
-          final pet = _userPets[index];
-          return Container(
-            width: 160,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-              ],
+          var pet = _userPets[index];
+          return Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
+                ClipRRect(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20.0),
+                    topRight: Radius.circular(20.0),
+                  ),
                   child: Container(
+                    width: 160,
+                    height: 120,
                     decoration: BoxDecoration(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(15.0)),
                       image: DecorationImage(
                         image: NetworkImage(
-                            pet.imageUrl ?? 'https://via.placeholder.com/150'),
+                          pet.imageUrl ?? 'https://via.placeholder.com/150',
+                        ),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -365,7 +374,7 @@ class _AccountPageState extends State<AccountPage> {
 
   Widget _buildActionButtons() {
     return Padding(
-      padding: EdgeInsets.all(15.0), // Adjusted padding
+      padding: const EdgeInsets.all(16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -377,11 +386,15 @@ class _AccountPageState extends State<AccountPage> {
               );
             },
             icon: Icon(Icons.edit, color: Colors.white),
-            label: Text('Profili Düzenle'),
+            label: Text(
+              'Profili Düzenle',
+              style:
+                  TextStyle(color: Colors.white), // Buton yazısının rengi beyaz
+            ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple,
+              backgroundColor: Colors.purple, // Buton arka plan rengi mor
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
+                borderRadius: BorderRadius.circular(20.0),
               ),
             ),
           ),
@@ -393,17 +406,45 @@ class _AccountPageState extends State<AccountPage> {
               );
             },
             icon: Icon(Icons.lock, color: Colors.white),
-            label: Text('Şifreyi Değiştir'),
+            label: Text(
+              'Şifreyi Değiştir',
+              style:
+                  TextStyle(color: Colors.white), // Buton yazısının rengi beyaz
+            ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple,
+              backgroundColor: Colors.purple, // Buton arka plan rengi mor
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
+                borderRadius: BorderRadius.circular(20.0),
               ),
             ),
           ),
         ],
       ),
     );
+  }
+}
+
+class _HeaderPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    var paint = Paint()
+      ..color = Colors.white.withOpacity(0.2)
+      ..style = PaintingStyle.fill;
+
+    var path = Path()
+      ..moveTo(0, size.height * 0.6)
+      ..quadraticBezierTo(
+          size.width * 0.5, size.height, size.width, size.height * 0.6)
+      ..lineTo(size.width, 0)
+      ..lineTo(0, 0)
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
   }
 }
 
@@ -416,9 +457,6 @@ class ApplicationDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Başvuru Detayları'),
-      ),
       body: Center(
         child: Text('Başvuru ID: $applicationId'),
       ),

@@ -220,8 +220,9 @@ class PetDetailsScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  AdoptionApplicationForm(petOwnerId: petOwnerId),
+              builder: (context) => AdoptionApplicationForm(
+                petOwnerId: petOwnerId,
+              ),
             ),
           );
         } else {

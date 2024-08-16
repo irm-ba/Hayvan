@@ -4,9 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
 class AdoptionApplicationForm extends StatefulWidget {
-  final String petOwnerId; // Pet sahibi UUID'sini widget'a ekleyin
+  final String petOwnerId;
 
-  AdoptionApplicationForm({required this.petOwnerId}); // Constructor
+  AdoptionApplicationForm({
+    required this.petOwnerId,
+  });
 
   @override
   _AdoptionApplicationFormState createState() =>
@@ -125,7 +127,7 @@ class _AdoptionApplicationFormState extends State<AdoptionApplicationForm> {
                 SizedBox(height: 24),
                 Center(
                   child: ElevatedButton(
-                    onPressed: _submitForm, // Form verilerini gönder
+                    onPressed: _submitForm,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.purple[700],
                       foregroundColor: Colors.white,
@@ -151,7 +153,6 @@ class _AdoptionApplicationFormState extends State<AdoptionApplicationForm> {
     );
   }
 
-  // Modern görünümlü TextField oluşturmak için yardımcı metod
   Widget _buildTextField({
     required TextEditingController controller,
     required String labelText,
@@ -166,7 +167,7 @@ class _AdoptionApplicationFormState extends State<AdoptionApplicationForm> {
             color: Colors.black.withOpacity(0.1),
             spreadRadius: 2,
             blurRadius: 5,
-            offset: Offset(0, 3), // Yükseklik ve yatay gölge
+            offset: Offset(0, 3),
           ),
         ],
       ),
@@ -195,10 +196,8 @@ class _AdoptionApplicationFormState extends State<AdoptionApplicationForm> {
     );
   }
 
-  // Form verilerini Firestore'a gönderme
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      // Form verilerini toplayın
       final name = _nameController.text;
       final phone = _phoneController.text;
       final email = _emailController.text;
@@ -207,21 +206,20 @@ class _AdoptionApplicationFormState extends State<AdoptionApplicationForm> {
       final adoptionReason = _adoptionReasonController.text;
 
       try {
-        // UUID oluşturun
         final String applicationId = _uuid.v4();
         final String userId =
             FirebaseAuth.instance.currentUser?.uid ?? _uuid.v4();
         final String petOwnerId = widget.petOwnerId;
+        final String petId = _uuid.v4(); // UUID ile yeni pet ID'si oluştur
 
-        // Yeni bir belge referansı oluşturun
         DocumentReference docRef =
             _firestore.collection('adoption_applications').doc(applicationId);
 
-        // Verileri Firestore'a gönderin
         await docRef.set({
-          'applicationId': applicationId, // UUID olarak başvuru ID'si
-          'userId': userId, // UUID olarak kullanıcı ID'si
-          'petOwnerId': petOwnerId, // UUID olarak pet sahibi ID'si
+          'applicationId': applicationId,
+          'userId': userId,
+          'petOwnerId': petOwnerId,
+          'petId': petId, // UUID ile oluşturulmuş pet ID'si
           'name': name,
           'phone': phone,
           'email': email,
@@ -230,12 +228,10 @@ class _AdoptionApplicationFormState extends State<AdoptionApplicationForm> {
           'adoptionReason': adoptionReason,
         });
 
-        // Başarı mesajı gösterin
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Başvurunuz gönderildi')),
         );
 
-        // Formu sıfırla
         _nameController.clear();
         _phoneController.clear();
         _emailController.clear();
@@ -243,7 +239,6 @@ class _AdoptionApplicationFormState extends State<AdoptionApplicationForm> {
         _livingConditionsController.clear();
         _adoptionReasonController.clear();
       } catch (e) {
-        // Hata mesajı gösterin
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Bir hata oluştu, lütfen tekrar deneyin')),
         );

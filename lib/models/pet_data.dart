@@ -11,8 +11,8 @@ class PetData {
   final String animalType;
   final String location;
   final String description;
-  final String petId; // ID özelliği
-  final String userId; // Kullanıcı ID özelliği
+  final String petId;
+  final String userId;
 
   PetData({
     required this.name,
@@ -41,8 +41,8 @@ class PetData {
       animalType: map['animalType'] ?? '',
       location: map['location'] ?? '',
       description: map['description'] ?? '',
-      petId: map['petId'] ?? '', // ID özelliği
-      userId: map['userId'] ?? '', // Kullanıcı ID özelliği
+      petId: map['petId'] ?? '',
+      userId: map['userId'] ?? '',
     );
   }
 

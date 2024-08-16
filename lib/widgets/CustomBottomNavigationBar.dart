@@ -4,7 +4,6 @@ import 'package:pet_adoption/account.dart';
 import 'package:pet_adoption/healtbutton.dart';
 import 'package:pet_adoption/product_add_page.dart';
 import 'package:pet_adoption/screens/home.dart';
-import 'package:pet_adoption/screens/home_page.dart';
 
 class CustomBottomNavigationBar extends StatefulWidget {
   @override
@@ -21,8 +20,9 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
       Icons.home,
       Icons.notifications,
       Icons.add, // Ortadaki artı ikonu
+
+      Icons.list,
       Icons.person_outline,
-      Icons.list
     ];
 
     return BottomNavigationBar(
@@ -129,13 +129,13 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
       case 3:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => AccountPage()),
+          MaterialPageRoute(builder: (context) => AdoptionApplicationsPage()),
         );
         break;
       case 4:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => AdoptionApplicationsPage()),
+          MaterialPageRoute(builder: (context) => AccountPage()),
         );
         break;
     }
