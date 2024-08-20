@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pet_adoption/login.dart';
-import 'package:pet_adoption/constants.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -15,12 +15,16 @@ class _SignupPageState extends State<SignupPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   String? _errorMessage;
 
   void _signup() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
 
     if (password != confirmPassword) {
       setState(() {
@@ -30,8 +34,25 @@ class _SignupPageState extends State<SignupPage> {
     }
 
     try {
-      await _auth.createUserWithEmailAndPassword(
-          email: email, password: password);
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Add user data to Firestore
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user?.uid)
+          .set({
+        'firstName': firstName,
+        'lastName': lastName,
+        'email': email,
+        'profileImageUrl': '', // Default or empty initially
+        'location': '', // Default or empty initially
+        'phoneNumber': '', // Default or empty initially
+      });
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => LoginPage()),
@@ -48,6 +69,8 @@ class _SignupPageState extends State<SignupPage> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     super.dispose();
   }
 
@@ -91,6 +114,36 @@ class _SignupPageState extends State<SignupPage> {
                 ),
                 Column(
                   children: <Widget>[
+                    TextField(
+                      controller: _firstNameController,
+                      decoration: InputDecoration(
+                        hintText: "Ad",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none,
+                        ),
+                        fillColor: const Color.fromARGB(255, 196, 120, 209)
+                            .withOpacity(0.1),
+                        filled: true,
+                        prefixIcon: const Icon(Icons.person),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _lastNameController,
+                      decoration: InputDecoration(
+                        hintText: "Soyad",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none,
+                        ),
+                        fillColor: const Color.fromARGB(255, 196, 120, 209)
+                            .withOpacity(0.1),
+                        filled: true,
+                        prefixIcon: const Icon(Icons.person),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                     TextField(
                       controller: _emailController,
                       decoration: InputDecoration(

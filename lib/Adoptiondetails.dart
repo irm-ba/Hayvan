@@ -1,11 +1,10 @@
-import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ApplicationDetailPage extends StatelessWidget {
-  final String applicationId;
-
   ApplicationDetailPage({required this.applicationId});
+
+  final String applicationId;
 
   @override
   Widget build(BuildContext context) {
@@ -125,11 +124,11 @@ class ApplicationDetailPage extends StatelessWidget {
 }
 
 class InfoCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final List<Widget> content;
-
   InfoCard({required this.title, required this.icon, required this.content});
+
+  final List<Widget> content;
+  final IconData icon;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -172,10 +171,10 @@ class InfoCard extends StatelessWidget {
 }
 
 class InfoRow extends StatelessWidget {
+  InfoRow({required this.label, required this.value});
+
   final String label;
   final String? value;
-
-  InfoRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {

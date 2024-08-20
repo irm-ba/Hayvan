@@ -15,6 +15,18 @@ class _AdminApplicationState extends State<AdminApplication> {
   Map<String, dynamic>? _applicationData;
   Map<String, dynamic>? _userData;
   Map<String, dynamic>? _petData;
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  // State variables for selecting which details to show
+  bool _showName = true;
+  bool _showEmail = true;
+  bool _showPhone = true;
+  bool _showPetName = true;
+  bool _showAnimalType = true;
+  bool _showBreed = true;
+  bool _showAdoptionReason = true;
+  bool _showLivingConditions = true;
 
   @override
   void initState() {
@@ -29,29 +41,42 @@ class _AdminApplicationState extends State<AdminApplication> {
           .doc(widget.applicationId)
           .get();
 
-      setState(() {
-        _applicationData = applicationDoc.data() as Map<String, dynamic>?;
-      });
-
-      if (_applicationData != null) {
-        String userId = _applicationData!['userId'];
-        String petId = _applicationData!['petId'];
-
-        DocumentSnapshot userDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .get();
-
-        DocumentSnapshot petDoc =
-            await FirebaseFirestore.instance.collection('pet').doc(petId).get();
-
+      if (applicationDoc.exists) {
         setState(() {
-          _userData = userDoc.data() as Map<String, dynamic>?;
-          _petData = petDoc.data() as Map<String, dynamic>?;
+          _applicationData = applicationDoc.data() as Map<String, dynamic>?;
+          _isLoading = false;
+        });
+
+        if (_applicationData != null) {
+          String userId = _applicationData!['userId'];
+          String petId = _applicationData!['petId'];
+
+          DocumentSnapshot userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userId)
+              .get();
+
+          DocumentSnapshot petDoc = await FirebaseFirestore.instance
+              .collection('pet')
+              .doc(petId)
+              .get();
+
+          setState(() {
+            _userData = userDoc.data() as Map<String, dynamic>?;
+            _petData = petDoc.data() as Map<String, dynamic>?;
+          });
+        }
+      } else {
+        setState(() {
+          _errorMessage = 'Başvuru bulunamadı.';
+          _isLoading = false;
         });
       }
     } catch (e) {
-      print('Başvuru detayları alınırken bir hata oluştu: $e');
+      setState(() {
+        _errorMessage = 'Başvuru detayları alınırken bir hata oluştu: $e';
+        _isLoading = false;
+      });
     }
   }
 
@@ -60,16 +85,15 @@ class _AdminApplicationState extends State<AdminApplication> {
       await FirebaseFirestore.instance
           .collection('adoption_applications')
           .doc(widget.applicationId)
-          .update({
-        'status': status,
-        'lastUpdated': FieldValue.serverTimestamp(),
-      });
+          .update({'status': status});
 
-      setState(() {
-        _applicationData?['status'] = status; // Durumu güncelle
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Başvuru $status olarak güncellendi.')),
+      );
     } catch (e) {
-      print('Başvuru durumu güncellenirken bir hata oluştu: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Güncelleme sırasında bir hata oluştu: $e')),
+      );
     }
   }
 
@@ -77,22 +101,38 @@ class _AdminApplicationState extends State<AdminApplication> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Başvuru Detayları'),
+        title: Text(
+          'Başvuru Detayları',
+          style: TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         backgroundColor: Colors.purple[800],
+        elevation: 4.0,
       ),
-      body: _applicationData == null || _userData == null || _petData == null
+      body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildApplicationDetails(),
-                  SizedBox(height: 20),
-                  _buildActionButtons(),
-                ],
-              ),
-            ),
+          : _errorMessage != null
+              ? Center(child: Text(_errorMessage!))
+              : Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: ListView(
+                          children: [
+                            _buildApplicationDetails(),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      _buildActionButtons(),
+                    ],
+                  ),
+                ),
     );
   }
 
@@ -105,40 +145,127 @@ class _AdminApplicationState extends State<AdminApplication> {
             : Colors.orange;
 
     return Card(
-      elevation: 5,
+      elevation: 8,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
       ),
       margin: EdgeInsets.symmetric(vertical: 8.0),
+      color: Colors.white,
       child: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Başvuran: ${_userData!['firstName']}',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Hayvan: ${_petData!['name']}',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Neden: ${_applicationData!['adoptionReason']}',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Durum: $status',
+              'Başvuru Durumu',
               style: TextStyle(
-                fontSize: 16,
-                color: statusColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.purple[700],
               ),
             ),
+            SizedBox(height: 10),
+            Row(
+              children: [
+                Chip(
+                  label: Text(
+                    status,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  backgroundColor: statusColor,
+                ),
+              ],
+            ),
+            Divider(color: Colors.grey[400], height: 30),
+            Text(
+              'Başvuran Detayları',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.purple[700],
+              ),
+            ),
+            SizedBox(height: 10),
+            if (_showName)
+              _buildDetailRow('İsim',
+                  '${_userData?['firstName']} ${_userData?['lastName']}'),
+            if (_showEmail)
+              _buildDetailRow(
+                  'E-posta', _userData?['email'] ?? 'Bilgi mevcut değil'),
+            if (_showPhone)
+              _buildDetailRow(
+                  'Telefon', _userData?['phone'] ?? 'Bilgi mevcut değil'),
+            Divider(color: Colors.grey[400], height: 30),
+            Text(
+              'Hayvan Detayları',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.purple[700],
+              ),
+            ),
+            SizedBox(height: 10),
+            if (_showPetName)
+              _buildDetailRow(
+                  'Hayvan', _petData?['name'] ?? 'Bilgi mevcut değil'),
+            if (_showAnimalType)
+              _buildDetailRow(
+                  'Tür', _petData?['animalType'] ?? 'Bilgi mevcut değil'),
+            if (_showBreed)
+              _buildDetailRow(
+                  'Irk', _petData?['breed'] ?? 'Bilgi mevcut değil'),
+            Divider(color: Colors.grey[400], height: 30),
+            Text(
+              'Başvuru Detayları',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.purple[700],
+              ),
+            ),
+            SizedBox(height: 10),
+            if (_showAdoptionReason)
+              _buildDetailRow('Başvuru Nedeni',
+                  _applicationData?['adoptionReason'] ?? 'Bilgi mevcut değil'),
+            if (_showLivingConditions)
+              _buildDetailRow(
+                  'Yaşam Koşulları',
+                  _applicationData?['livingConditions'] ??
+                      'Bilgi mevcut değil'),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.purple[800],
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -152,9 +279,7 @@ class _AdminApplicationState extends State<AdminApplication> {
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            ),
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           ),
           child: Text('Onayla'),
         ),
@@ -163,9 +288,7 @@ class _AdminApplicationState extends State<AdminApplication> {
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.red,
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            ),
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           ),
           child: Text('Reddet'),
         ),

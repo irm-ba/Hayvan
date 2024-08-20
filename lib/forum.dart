@@ -14,7 +14,8 @@ class _ForumPageState extends State<ForumPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Forum'),
-        backgroundColor: Color(0xFFC478D1), // Color updated
+
+        foregroundColor: Colors.white, // İkon ve yazı rengi
         actions: [
           IconButton(
             icon: Icon(Icons.add),
@@ -27,48 +28,42 @@ class _ForumPageState extends State<ForumPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('forumQuestions')
-              .orderBy('timestamp', descending: true)
-              .snapshots(),
-          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (!snapshot.hasData) {
-              return Center(child: CircularProgressIndicator());
-            }
+      body: Container(
+        color: Colors.white, // Sayfa arka planı beyaz
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('forumQuestions')
+                .orderBy('timestamp', descending: true)
+                .snapshots(),
+            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (!snapshot.hasData) {
+                return Center(child: CircularProgressIndicator());
+              }
 
-            return ListView(
-              children: snapshot.data!.docs.map((doc) {
-                var data = doc.data() as Map<String, dynamic>;
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AnswersPage(
-                          questionId: doc.id,
-                          questionData: data,
+              return ListView(
+                children: snapshot.data!.docs.map((doc) {
+                  var data = doc.data() as Map<String, dynamic>;
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AnswersPage(
+                            questionId: doc.id,
+                            questionData: data,
+                          ),
                         ),
+                      );
+                    },
+                    child: Card(
+                      elevation: 8,
+                      margin: EdgeInsets.symmetric(vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
                       ),
-                    );
-                  },
-                  child: Card(
-                    elevation: 6,
-                    margin: EdgeInsets.symmetric(vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Ink(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFFC478D1), Color(0xFFC478D1)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                      color: Colors.white,
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
@@ -77,18 +72,20 @@ class _ForumPageState extends State<ForumPage> {
                             Row(
                               children: [
                                 CircleAvatar(
-                                  backgroundColor: Colors.white,
+                                  backgroundColor: Color.fromARGB(
+                                      255, 147, 58, 142), // Kbrown rengi
                                   child: Icon(Icons.question_answer,
-                                      color: Color(0xFFC478D1)),
+                                      color: Colors.white),
                                 ),
                                 SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
                                     data['question'] ?? 'No question',
                                     style: TextStyle(
-                                      fontSize: 18,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                      color: Color.fromARGB(
+                                          255, 147, 58, 142), // Kbrown rengi
                                     ),
                                   ),
                                 ),
@@ -106,9 +103,12 @@ class _ForumPageState extends State<ForumPage> {
                                     return Padding(
                                       padding:
                                           const EdgeInsets.only(right: 8.0),
-                                      child: Image.network(
-                                        data['imageUrls'][index],
-                                        fit: BoxFit.cover,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          data['imageUrls'][index],
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
                                     );
                                   },
@@ -119,7 +119,7 @@ class _ForumPageState extends State<ForumPage> {
                               "Posted by: ${data['userName'] ?? 'Anonymous'}",
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.white70,
+                                color: Colors.grey[700],
                               ),
                             ),
                             SizedBox(height: 4),
@@ -127,18 +127,18 @@ class _ForumPageState extends State<ForumPage> {
                               _getTimeAgo(data['timestamp']),
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.white70,
+                                color: Colors.grey[700],
                               ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                  ),
-                );
-              }).toList(),
-            );
-          },
+                  );
+                }).toList(),
+              );
+            },
+          ),
         ),
       ),
     );

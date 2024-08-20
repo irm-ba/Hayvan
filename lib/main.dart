@@ -16,9 +16,13 @@ import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-  runApp(MyApp());
+  try {
+    await Firebase.initializeApp();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+    runApp(MyApp());
+  } catch (e) {
+    print("Error initializing Firebase: $e");
+  }
 }
 
 class MyApp extends StatelessWidget {
