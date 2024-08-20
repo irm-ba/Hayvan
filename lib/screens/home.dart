@@ -298,7 +298,7 @@ class _HomeState extends State<Home> {
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButton<String>(
-                value: selectedAnimalType,
+                value: selectedAnimalType.isEmpty ? null : selectedAnimalType,
                 hint: Text('Hayvan Türü Seçin'),
                 items: <String>[
                   '',
@@ -316,7 +316,7 @@ class _HomeState extends State<Home> {
                 }).toList(),
                 onChanged: (value) {
                   setState(() {
-                    selectedAnimalType = value!;
+                    selectedAnimalType = value ?? '';
                   });
                 },
               ),
@@ -331,7 +331,7 @@ class _HomeState extends State<Home> {
                 },
               ),
               DropdownButton<String>(
-                value: location,
+                value: location.isEmpty ? null : location,
                 hint: Text('Konum Seçin'),
                 items: [
                   'Adana',
@@ -423,7 +423,7 @@ class _HomeState extends State<Home> {
                 }).toList(),
                 onChanged: (value) {
                   setState(() {
-                    location = value!;
+                    location = value ?? '';
                   });
                 },
               ),
@@ -431,24 +431,17 @@ class _HomeState extends State<Home> {
           ),
           actions: [
             ElevatedButton(
-              child: Text('Filtrele'),
+              child: Text('Uygula'),
               onPressed: () {
                 Navigator.of(context).pop();
                 setState(() {}); // Filtreleme sonrası yenileme
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: kBrownColor, // Mor renk
-              ),
+              style: ElevatedButton.styleFrom(),
             ),
             TextButton(
-              child: Text('Sıfırla'),
+              child: Text('İptal'),
               onPressed: () {
-                Navigator.of(context).pop();
-                setState(() {
-                  selectedAnimalType = '';
-                  ageRange = '';
-                  location = '';
-                });
+                Navigator.of(context).pop(); // Filtreleme iptal edildi
               },
             ),
           ],
