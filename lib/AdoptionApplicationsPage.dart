@@ -20,21 +20,10 @@ class AdoptionApplicationsPage extends StatelessWidget {
         title: Text(
           'Başvuru Listesi',
           style: TextStyle(
-            fontSize: 16.0,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Color.fromARGB(255, 147, 58, 142),
           ),
         ),
-        backgroundColor: Colors.purple[800],
-        elevation: 4.0,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search, color: Colors.white),
-            onPressed: () {
-              // Arama işlevi eklenebilir
-            },
-          ),
-        ],
+        elevation: 0,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -89,29 +78,35 @@ class AdoptionApplicationsPage extends StatelessWidget {
                   String petName = petDetails?.name ?? 'Bilinmiyor';
 
                   return Card(
-                    margin: EdgeInsets.all(8.0),
+                    margin:
+                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                     elevation: 5.0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(16.0),
                     ),
                     child: ListTile(
                       contentPadding: EdgeInsets.all(16.0),
-                      leading: imageUrl.isNotEmpty
-                          ? Image.network(
-                              imageUrl,
-                              width: 50,
-                              height: 50,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Icon(Icons.error, color: Colors.red);
-                              },
-                            )
-                          : Icon(Icons.pets, color: Colors.purple[700]),
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: imageUrl.isNotEmpty
+                            ? Image.network(
+                                imageUrl,
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Icon(Icons.error, color: Colors.red);
+                                },
+                              )
+                            : Icon(Icons.pets,
+                                color: Color.fromARGB(255, 147, 58, 142),
+                                size: 60.0),
+                      ),
                       title: Text(
                         petName,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16.0,
+                          fontSize: 18.0,
                         ),
                       ),
                       subtitle: Text(

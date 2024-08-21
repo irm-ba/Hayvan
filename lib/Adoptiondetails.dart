@@ -12,9 +12,10 @@ class ApplicationDetailPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Başvuru Detayı',
-          style: TextStyle(color: Colors.white), // Başlık rengi beyaz
+          style: TextStyle(
+            color: Color.fromARGB(255, 147, 58, 142),
+          ),
         ),
-        backgroundColor: Colors.purple[800],
       ),
       body: FutureBuilder<DocumentSnapshot>(
         future: FirebaseFirestore.instance
@@ -36,7 +37,8 @@ class ApplicationDetailPage extends StatelessWidget {
 
           var application = snapshot.data!.data() as Map<String, dynamic>;
 
-          return Padding(
+          return Container(
+            color: Color(0xFFF2F2F2), // Arka plan rengini hafif gri yaptık
             padding: EdgeInsets.all(16.0),
             child: ListView(
               children: [
@@ -66,54 +68,6 @@ class ApplicationDetailPage extends StatelessWidget {
                 ),
 
                 SizedBox(height: 20),
-
-                // Başvuruyu Yapan Kullanıcı Bilgileri Kartı
-                InfoCard(
-                  title: 'Başvuruyu Yapan Kullanıcı Bilgileri',
-                  icon: Icons.person,
-                  content: [
-                    FutureBuilder<DocumentSnapshot>(
-                      future: FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(application['userId'])
-                          .get(),
-                      builder: (context, userSnapshot) {
-                        if (userSnapshot.hasError) {
-                          return Center(
-                              child: Text(
-                                  'Bir hata oluştu: ${userSnapshot.error}'));
-                        }
-
-                        if (userSnapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
-                        }
-
-                        if (!userSnapshot.hasData ||
-                            !userSnapshot.data!.exists) {
-                          return Center(
-                              child: Text('Kullanıcı bilgileri bulunamadı.'));
-                        }
-
-                        var user =
-                            userSnapshot.data!.data() as Map<String, dynamic>;
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            InfoRow(
-                                label: 'Kullanıcı Adı:',
-                                value:
-                                    '${user['firstName']} ${user['lastName']}'),
-                            InfoRow(label: 'E-posta:', value: user['email']),
-                            InfoRow(
-                                label: 'Telefon:', value: user['phoneNumber']),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
-                ),
               ],
             ),
           );
@@ -135,11 +89,12 @@ class InfoCard extends StatelessWidget {
     return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius:
+            BorderRadius.circular(16), // Kenarları daha yuvarlak yaptık
       ),
       margin: EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(20.0), // İçeriği biraz daha geniş tuttuk
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -147,21 +102,22 @@ class InfoCard extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  size: 24,
-                  color: Colors.purple[800],
+                  size: 28, // İkonun boyutunu biraz büyüttük
+                  color: Color.fromARGB(255, 147, 58, 142),
                 ),
-                SizedBox(width: 10),
+                SizedBox(width: 12),
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 20, // Başlık fontunu büyüttük
                     fontWeight: FontWeight.bold,
-                    color: Colors.purple[800],
+                    color: Color.fromARGB(255, 147, 58, 142),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 10),
+            SizedBox(
+                height: 12), // Başlık ve içerik arasındaki boşluğu artırdık
             ...content,
           ],
         ),
@@ -179,7 +135,8 @@ class InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 8.0),
+      padding:
+          EdgeInsets.only(bottom: 12.0), // Satırlar arasındaki boşluğu artırdık
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -190,7 +147,7 @@ class InfoRow extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.purple[700],
+                color: Color.fromARGB(255, 147, 58, 142),
               ),
             ),
           ),

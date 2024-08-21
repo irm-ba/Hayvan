@@ -87,13 +87,11 @@ class _AdminApplicationState extends State<AdminApplication> {
           .doc(widget.applicationId)
           .update({'status': status});
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Başvuru $status olarak güncellendi.')),
-      );
+      setState(() {
+        _applicationData?['status'] = status;
+      });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Güncelleme sırasında bir hata oluştu: $e')),
-      );
+      // Hata işleme kodunu burada ekleyebilirsiniz.
     }
   }
 
@@ -106,10 +104,9 @@ class _AdminApplicationState extends State<AdminApplication> {
           style: TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Color.fromARGB(255, 147, 58, 142),
           ),
         ),
-        backgroundColor: Colors.purple[800],
         elevation: 4.0,
       ),
       body: _isLoading
@@ -161,7 +158,7 @@ class _AdminApplicationState extends State<AdminApplication> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.purple[700],
+                color: Color.fromARGB(255, 147, 58, 142),
               ),
             ),
             SizedBox(height: 10),
@@ -185,7 +182,7 @@ class _AdminApplicationState extends State<AdminApplication> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.purple[700],
+                color: Color.fromARGB(255, 147, 58, 142),
               ),
             ),
             SizedBox(height: 10),
@@ -204,7 +201,7 @@ class _AdminApplicationState extends State<AdminApplication> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.purple[700],
+                color: Color.fromARGB(255, 147, 58, 142),
               ),
             ),
             SizedBox(height: 10),
@@ -223,7 +220,7 @@ class _AdminApplicationState extends State<AdminApplication> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.purple[700],
+                color: Color.fromARGB(255, 147, 58, 142),
               ),
             ),
             SizedBox(height: 10),
@@ -252,7 +249,7 @@ class _AdminApplicationState extends State<AdminApplication> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.purple[800],
+              color: Color.fromARGB(255, 147, 58, 142),
             ),
           ),
           Expanded(
@@ -274,23 +271,25 @@ class _AdminApplicationState extends State<AdminApplication> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        ElevatedButton(
+        ElevatedButton.icon(
           onPressed: () => _updateApplicationStatus('Onaylandı'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
             foregroundColor: Colors.white,
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           ),
-          child: Text('Onayla'),
+          icon: Icon(Icons.check),
+          label: Text('Onayla'),
         ),
-        ElevatedButton(
+        ElevatedButton.icon(
           onPressed: () => _updateApplicationStatus('Reddedildi'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.red,
             foregroundColor: Colors.white,
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           ),
-          child: Text('Reddet'),
+          icon: Icon(Icons.close),
+          label: Text('Reddet'),
         ),
       ],
     );

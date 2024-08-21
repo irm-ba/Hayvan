@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'CreateEvent.dart';
-import '/models/event_data.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Kullanıcı kimliği için
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pet_adoption/CreateEvent.dart';
+import 'package:pet_adoption/models/event_data.dart'; // Kullanıcı kimliği için
 
 class EventPage extends StatefulWidget {
   const EventPage({Key? key}) : super(key: key);
@@ -39,17 +39,19 @@ class _EventPageState extends State<EventPage> {
             return Center(child: Text('Hata oluştu: ${snapshot.error}'));
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('Etkinlik bulunamadı.'));
+            return Center(child: Text('Henüz etkinlik bulunmamaktadır.'));
           }
 
-          List<EventData> events = snapshot.data!.docs.map((doc) {
-            return EventData.fromSnapshot(doc);
-          }).toList();
+          List<QueryDocumentSnapshot> docs = snapshot.data!.docs;
 
           return ListView.builder(
-            itemCount: events.length,
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            itemCount: docs.length,
             itemBuilder: (context, index) {
-              return EventCard(eventData: events[index]);
+              var doc = docs[index];
+              return EventCard(
+                eventData: EventData.fromSnapshot(doc),
+              );
             },
           );
         },
@@ -86,51 +88,164 @@ class EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      margin: EdgeInsets.all(10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Etkinlik resmi
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-            child: eventData.imageUrl != null
-                ? Image.network(eventData.imageUrl!, fit: BoxFit.cover)
-                : Placeholder(fallbackHeight: 200),
+    return GestureDetector(
+      onTap: () => _showEventDetails(context),
+      child: Card(
+        elevation: 8,
+        margin: EdgeInsets.symmetric(vertical: 12.0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        color: Colors.white,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12.0)),
+              child: eventData.imageUrl != null
+                  ? Image.network(
+                      eventData.imageUrl!,
+                      height: 200,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+                  : Placeholder(fallbackHeight: 200),
+            ),
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    eventData.title ?? 'Başlık Yok',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: Color.fromARGB(255, 147, 58, 142),
+                    ),
+                  ),
+                  SizedBox(height: 8.0),
+                  Row(
+                    children: [
+                      Icon(Icons.date_range,
+                          color: Color.fromARGB(255, 170, 169, 170)),
+                      SizedBox(width: 4.0),
+                      Text(
+                        eventData.date ?? 'Tarih Yok',
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 14,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 4.0),
+                  Row(
+                    children: [
+                      Icon(Icons.people,
+                          color: Color.fromARGB(255, 170, 169, 170)),
+                      SizedBox(width: 4.0),
+                      Text(
+                        "${eventData.participants?.length} katılımcı",
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 14,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8.0),
+                  Text(
+                    eventData.description ?? 'Açıklama Yok',
+                    style: TextStyle(
+                      fontSize: 16,
+                      height: 1.5,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  SizedBox(height: 16.0),
+                  ElevatedButton(
+                    onPressed: () => joinEvent(context),
+                    child: Text('Etkinliğe Katıl'),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Color.fromARGB(255, 147, 58, 142),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showEventDetails(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
           ),
-          Padding(
-            padding: EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          title: Text(
+            eventData.title ?? 'Başlık Yok',
+            style: TextStyle(
+              color: Color.fromARGB(255, 147, 58, 142),
+            ),
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
               children: [
                 Text(
-                  eventData.title ?? 'Başlık Yok',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  'Etkinlik Tarihi: ${eventData.date ?? 'Tarih Yok'}',
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
-                SizedBox(height: 5),
-                Text(eventData.date ?? 'Tarih Yok',
-                    style: TextStyle(color: Colors.grey)),
-                SizedBox(height: 10),
-                Text(eventData.description ?? 'Açıklama Yok'),
-                SizedBox(height: 10),
-                Row(
-                  children: [
-                    Icon(Icons.people, color: Colors.grey),
-                    SizedBox(width: 5),
-                    Text("${eventData.participants?.length} katılımcı"),
-                  ],
+                SizedBox(height: 8.0),
+                Text(
+                  'Katılımcılar: ${eventData.participants?.length ?? 0}',
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
-                SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () => joinEvent(context),
-                  child: Text('Etkinliğe Katıl'),
+                SizedBox(height: 8.0),
+                Text(
+                  eventData.description ?? 'Açıklama Yok',
+                  style: TextStyle(
+                    fontSize: 16,
+                    height: 1.5,
+                    color: Colors.black87,
+                  ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              child: Text(
+                'Kapat',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 147, 58, 142),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

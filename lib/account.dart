@@ -134,8 +134,8 @@ class _AccountPageState extends State<AccountPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color.fromARGB(255, 173, 121, 179),
-            Color.fromARGB(255, 202, 121, 243)
+            Color(0xFFF0F0F0), // Daha açık bir arka plan rengi
+            Color(0xFFE0E0E0), // Daha koyu bir arka plan rengi
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -187,7 +187,7 @@ class _AccountPageState extends State<AccountPage> {
                   right: 0,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.purple,
+                      color: Color.fromARGB(255, 147, 58, 142),
                       shape: BoxShape.circle,
                     ),
                     child:
@@ -203,7 +203,7 @@ class _AccountPageState extends State<AccountPage> {
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.bold,
-              color: Colors.purple,
+              color: Color.fromARGB(255, 147, 58, 142),
             ),
           ),
           SizedBox(height: 4),
@@ -211,7 +211,7 @@ class _AccountPageState extends State<AccountPage> {
             FirebaseAuth.instance.currentUser?.email ?? '',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.purple,
+              color: Color.fromARGB(255, 147, 58, 142),
             ),
           ),
           SizedBox(height: 4),
@@ -219,7 +219,7 @@ class _AccountPageState extends State<AccountPage> {
             _userData!['phoneNumber'] ?? 'Telefon numarası yok',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.purple,
+              color: Color.fromARGB(255, 147, 58, 142),
             ),
           ),
         ],
@@ -295,7 +295,7 @@ class _AccountPageState extends State<AccountPage> {
         style: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          color: Colors.purple,
+          color: Color.fromARGB(255, 147, 58, 142),
         ),
       ),
     );
@@ -397,7 +397,7 @@ class _AccountPageState extends State<AccountPage> {
                   TextStyle(color: Colors.white), // Buton yazısının rengi beyaz
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple, // Buton arka plan rengi mor
+              backgroundColor: Color.fromARGB(255, 147, 58, 142),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20.0),
               ),
@@ -417,7 +417,7 @@ class _AccountPageState extends State<AccountPage> {
                   TextStyle(color: Colors.white), // Buton yazısının rengi beyaz
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple, // Buton arka plan rengi mor
+              backgroundColor: Color.fromARGB(255, 147, 58, 142),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20.0),
               ),
