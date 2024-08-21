@@ -45,7 +45,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Şifre Değiştir'),
-        backgroundColor: Colors.purple,
+
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -97,7 +97,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 onPressed: _changePassword,
                 child: Text('Şifreyi Değiştir'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
+                  backgroundColor: Color.fromARGB(255, 147, 58,142),
                   foregroundColor: Colors.white,
                 ),
               ),

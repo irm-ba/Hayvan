@@ -3,12 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:pet_adoption/adminaplication.dart';
 import 'package:pet_adoption/models/pet_data.dart';
 import 'EditProfile.dart';
-import 'change_password_page.dart';
-import 'Adoptiondetails.dart';
+import 'Change_Password_Page.dart';
 import 'dart:io';
+import 'adminaplication.dart'; // Import the AdminApplication page
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -17,16 +16,19 @@ class AccountPage extends StatefulWidget {
   State<AccountPage> createState() => _AccountPageState();
 }
 
-class _AccountPageState extends State<AccountPage> {
+class _AccountPageState extends State<AccountPage>
+    with SingleTickerProviderStateMixin {
   File? _profileImage;
   Map<String, dynamic>? _userData;
   List<PetData> _userPets = [];
   List<DocumentSnapshot> _userApplications = [];
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _initializeData();
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   Future<void> _initializeData() async {
@@ -107,348 +109,291 @@ class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          _buildBackground(),
-          _userData == null
-              ? Center(child: CircularProgressIndicator())
-              : SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildCustomBackButton(),
-                      SizedBox(height: 200),
-                      _buildProfileHeader(),
-                      _buildProfileDetails(),
-                      _buildActionButtons(),
-                    ],
-                  ),
-                ),
-        ],
+      appBar: AppBar(
+        title: Text('Profil'),
       ),
-    );
-  }
-
-  Widget _buildBackground() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color(0xFFF0F0F0), // Daha açık bir arka plan rengi
-            Color(0xFFE0E0E0), // Daha koyu bir arka plan rengi
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: CustomPaint(
-        painter: _HeaderPainter(),
-        child: Container(height: 300),
-      ),
-    );
-  }
-
-  Widget _buildCustomBackButton() {
-    return Positioned(
-      top: 40, // Yükseklik ayarı
-      left: 16, // Sol konum
-      child: IconButton(
-        icon: Icon(Icons.arrow_back, color: Colors.white),
-        onPressed: () {
-          Navigator.pop(context); // Geri tuşuna basıldığında geri dön
-        },
-      ),
-    );
-  }
-
-  Widget _buildProfileHeader() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: _pickImage,
-            child: Stack(
-              alignment: Alignment.center,
+      body: _userData == null
+          ? Center(child: CircularProgressIndicator())
+          : Column(
               children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Color.fromARGB(255, 255, 252, 252),
+                _buildHeader(),
+                _buildTabBar(),
+                Expanded(child: _buildTabBarView()),
+                _buildActionButtons(),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Stack(
+      children: [
+        // Arka plandaki resim
+        Positioned.fill(
+          child: Image.asset(
+            'assets/proarka.jpg', // Resmi projeye dahil ettiğinizde bu yolu kullanın
+            fit: BoxFit.cover,
+          ),
+        ),
+        // Üzerindeki içerikler
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 20),
+          color: Colors.white.withOpacity(
+              0.5), // Arka planı hafif şeffaf yaparak resmi göstermek için
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.topCenter,
+                child: GestureDetector(
+                  onTap: _pickImage,
                   child: CircleAvatar(
-                    radius: 45,
+                    radius: 50,
                     backgroundImage: _profileImage != null
                         ? FileImage(_profileImage!)
-                        : NetworkImage(_userData!['profileImageUrl'] ??
+                        : NetworkImage(_userData?['profileImageUrl'] ??
                             'https://via.placeholder.com/150') as ImageProvider,
                   ),
                 ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 147, 58, 142),
-                      shape: BoxShape.circle,
-                    ),
-                    child:
-                        Icon(Icons.camera_alt, color: Colors.white, size: 20),
-                  ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                _userData?['firstName'] ?? 'Kullanıcı Adı',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          SizedBox(height: 20),
-          Text(
-            _userData!['firstName'] ?? 'Kullanıcı Adı',
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: Color.fromARGB(255, 147, 58, 142),
-            ),
-          ),
-          SizedBox(height: 4),
-          Text(
-            FirebaseAuth.instance.currentUser?.email ?? '',
-            style: TextStyle(
-              fontSize: 16,
-              color: Color.fromARGB(255, 147, 58, 142),
-            ),
-          ),
-          SizedBox(height: 4),
-          Text(
-            _userData!['phoneNumber'] ?? 'Telefon numarası yok',
-            style: TextStyle(
-              fontSize: 16,
-              color: Color.fromARGB(255, 147, 58, 142),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildProfileDetails() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSectionTitle('Başvurularım'),
-          _userApplications.isNotEmpty
-              ? _buildApplicationsList()
-              : Center(child: Text('Başvuru bulunmuyor')),
-          SizedBox(height: 20),
-          _buildSectionTitle('Hayvanlarım'),
-          _userPets.isNotEmpty
-              ? _buildPetsList()
-              : Center(child: Text('Hayvanınız bulunmuyor')),
-          SizedBox(height: 40),
-        ],
-      ),
+  Widget _buildTabBar() {
+    return TabBar(
+      controller: _tabController,
+      tabs: [
+        Tab(text: 'Hayvanlarım'),
+        Tab(text: 'Başvuranlar'),
+      ],
+      indicatorColor: Color.fromARGB(255, 147, 58, 142),
+      labelColor: Color.fromARGB(255, 147, 58, 142),
+    );
+  }
+
+  Widget _buildTabBarView() {
+    return TabBarView(
+      controller: _tabController,
+      children: [
+        _buildPetsList(),
+        _buildApplicationsList(),
+      ],
     );
   }
 
   Widget _buildPetsList() {
-    return Container(
-      height: 200,
-      child: ListView.builder(
-        itemCount: _userPets.length,
-        itemBuilder: (context, index) {
-          var pet = _userPets[index];
-          return Card(
-            margin: EdgeInsets.symmetric(vertical: 8.0),
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20.0),
+    return _userPets.isNotEmpty
+        ? GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 0.75, // Kartlar için oran
             ),
-            child: ListTile(
-              contentPadding: EdgeInsets.all(12.0),
-              leading: CircleAvatar(
-                radius: 30,
-                backgroundImage: NetworkImage(pet.imageUrl),
-              ),
-              title: Text(
-                pet.name ?? 'Hayvan Adı',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16.0,
-                ),
-              ),
-              subtitle: Text(
-                pet.breed ?? 'Irk belirtilmemiş',
-                style: TextStyle(
-                  color: Colors.black54,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: Color.fromARGB(255, 147, 58, 142),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildApplicationsList() {
-    return Container(
-      height: 200,
-      child: ListView.builder(
-        itemCount: _userApplications.length,
-        itemBuilder: (context, index) {
-          var application = _userApplications[index];
-          String userId = application['userId'];
-          String petId = application['petId'];
-
-          return FutureBuilder<List<dynamic>>(
-            future: Future.wait([
-              FirebaseFirestore.instance.collection('users').doc(userId).get(),
-              FirebaseFirestore.instance.collection('pet').doc(petId).get(),
-            ]),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              }
-              if (!snapshot.hasData || snapshot.data == null) {
-                return Text('Data not found');
-              }
-
-              var userDoc = snapshot.data![0] as DocumentSnapshot;
-              var petDoc = snapshot.data![1] as DocumentSnapshot;
-
-              String applicantName =
-                  userDoc['firstName'] ?? 'Name not provided';
-              String petName = petDoc['name'] ?? 'Pet Name';
-              String petImageUrl =
-                  petDoc['imageUrl'] ?? 'https://via.placeholder.com/150';
-
+            padding: EdgeInsets.all(16),
+            itemCount: _userPets.length,
+            itemBuilder: (context, index) {
+              var pet = _userPets[index];
               return Card(
-                margin: EdgeInsets.symmetric(vertical: 8.0),
-                elevation: 4,
+                elevation: 5,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
+                  borderRadius: BorderRadius.circular(15),
                 ),
-                child: ListTile(
-                  contentPadding: EdgeInsets.all(12.0),
-                  leading: CircleAvatar(
-                    radius: 30,
-                    backgroundImage: NetworkImage(petImageUrl),
-                  ),
-                  title: Text(
-                    '$applicantName - $petName',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.0,
-                    ),
-                  ),
-                  subtitle: Text(
-                    application['adoptionReason'] ?? 'Reason not provided',
-                    style: TextStyle(
-                      color: Colors.black54,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AdminApplication(
-                          applicationId: application.id,
-                        ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ClipRRect(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(15)),
+                      child: Image.network(
+                        pet.imageUrl,
+                        height: MediaQuery.of(context).size.width / 2 -
+                            32, // Kare yapacak şekilde ayarla
+                        width: MediaQuery.of(context).size.width / 2 -
+                            32, // Kare yapacak şekilde ayarla
+                        fit: BoxFit.cover,
                       ),
-                    );
-                  },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        pet.name ?? 'Hayvan Adı',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0,
+                          color: Colors.black,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
-          );
-        },
-      ),
-    );
+          )
+        : Center(child: Text('Hayvanınız bulunmuyor'));
+  }
+
+  Widget _buildApplicationsList() {
+    return _userApplications.isNotEmpty
+        ? GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 0.75, // Kartlar için oran
+            ),
+            padding: EdgeInsets.all(16),
+            itemCount: _userApplications.length,
+            itemBuilder: (context, index) {
+              var application = _userApplications[index];
+              String userId = application['userId'];
+              String petId = application['petId'];
+
+              return FutureBuilder<List<DocumentSnapshot>>(
+                future: Future.wait([
+                  FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userId)
+                      .get(),
+                  FirebaseFirestore.instance.collection('pet').doc(petId).get(),
+                ]),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError ||
+                      !snapshot.hasData ||
+                      snapshot.data!.length != 2) {
+                    return Center(child: Text('Veri yüklenemedi.'));
+                  }
+
+                  DocumentSnapshot userDoc = snapshot.data![0];
+                  DocumentSnapshot petDoc = snapshot.data![1];
+
+                  final userData = userDoc.data() as Map<String, dynamic>?;
+                  final petData = petDoc.data() as Map<String, dynamic>?;
+
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AdminApplication(
+                            applicationId: application.id,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Card(
+                      elevation: 5,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ClipRRect(
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(15)),
+                            child: Image.network(
+                              petData?['imageUrl'] ??
+                                  'https://via.placeholder.com/150',
+                              height: MediaQuery.of(context).size.width / 2 -
+                                  32, // Kare yapacak şekilde ayarla
+                              width: MediaQuery.of(context).size.width / 2 -
+                                  32, // Kare yapacak şekilde ayarla
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              petData?['name'] ?? 'Hayvan Adı',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16.0,
+                                color: Colors.black,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text(
+                              userData?['firstName'] ?? 'Başvuran Adı',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.grey[600],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          )
+        : Center(child: Text('Başvurunuz bulunmuyor'));
   }
 
   Widget _buildActionButtons() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          ElevatedButton.icon(
+          ElevatedButton(
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => EditProfilePage()),
               );
             },
-            icon: Icon(Icons.edit, color: Colors.white),
-            label: Text(
-              'Profili Düzenle',
-              style:
-                  TextStyle(color: Colors.white), // Buton yazısının rengi beyaz
-            ),
+            child: Text('Profil Düzenle'),
             style: ElevatedButton.styleFrom(
+              foregroundColor: Color.fromARGB(255, 255, 255, 255),
               backgroundColor: Color.fromARGB(255, 147, 58, 142),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0),
-              ),
             ),
           ),
-          ElevatedButton.icon(
+          ElevatedButton(
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => ChangePasswordPage()),
               );
             },
-            icon: Icon(Icons.lock, color: Colors.white),
-            label: Text(
-              'Şifreyi Değiştir',
-              style:
-                  TextStyle(color: Colors.white), // Buton yazısının rengi beyaz
-            ),
+            child: Text('Şifre Değiştir'),
             style: ElevatedButton.styleFrom(
+              foregroundColor: Color.fromARGB(255, 255, 255, 255),
               backgroundColor: Color.fromARGB(255, 147, 58, 142),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0),
-              ),
             ),
           ),
         ],
       ),
     );
-  }
-}
-
-class _HeaderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    var paint = Paint()
-      ..color = Colors.white.withOpacity(0.2)
-      ..style = PaintingStyle.fill;
-
-    var path = Path()
-      ..moveTo(0, size.height * 0.6)
-      ..quadraticBezierTo(
-          size.width * 0.5, size.height, size.width, size.height * 0.6)
-      ..lineTo(size.width, 0)
-      ..lineTo(0, 0)
-      ..close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
   }
 }
