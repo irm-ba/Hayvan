@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pet_adoption/chatPage.dart';
 
 class AdminApplication extends StatefulWidget {
   final String applicationId;
@@ -93,6 +95,10 @@ class _AdminApplicationState extends State<AdminApplication> {
     } catch (e) {
       // Hata işleme kodunu burada ekleyebilirsiniz.
     }
+  }
+
+  String getCurrentUserId() {
+    return FirebaseAuth.instance.currentUser?.uid ?? '';
   }
 
   @override
@@ -268,29 +274,68 @@ class _AdminApplicationState extends State<AdminApplication> {
   }
 
   Widget _buildActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    String status = _applicationData?['status'] ?? 'Bekleniyor';
+
+    return Column(
       children: [
-        ElevatedButton.icon(
-          onPressed: () => _updateApplicationStatus('Onaylandı'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
-            foregroundColor: Colors.white,
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          ),
-          icon: Icon(Icons.check),
-          label: Text('Onayla'),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            ElevatedButton.icon(
+              onPressed: () => _updateApplicationStatus('Onaylandı'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              icon: Icon(Icons.check),
+              label: Text('Onayla'),
+            ),
+            ElevatedButton.icon(
+              onPressed: () => _updateApplicationStatus('Reddedildi'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              icon: Icon(Icons.close),
+              label: Text('Reddet'),
+            ),
+          ],
         ),
-        ElevatedButton.icon(
-          onPressed: () => _updateApplicationStatus('Reddedildi'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
-            foregroundColor: Colors.white,
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        SizedBox(height: 16),
+        if (status == 'Onaylandı')
+          ElevatedButton.icon(
+            onPressed: () async {
+              final currentUserId =
+                  getCurrentUserId(); // Onaylayan kişinin ID'si
+              final receiverId =
+                  _applicationData?['userId']; // Onaylanan kişinin ID'si
+
+              // Eğer chat için bir konuşma ID'si gerekiyorsa, bunu burada oluşturabilirsiniz
+              // Örneğin, receiverId ve currentUserId'yi birleştirerek oluşturabilirsiniz
+              final conversationId = '${receiverId}_$currentUserId';
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatPage(
+                    conversationId: conversationId,
+                    receiverId: receiverId!,
+                    receiverName:
+                        '${_userData?['firstName']} ${_userData?['lastName']}',
+                  ),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color.fromARGB(255, 147, 58, 142),
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            icon: Icon(Icons.chat),
+            label: Text('Mesajlaşmaya Git'),
           ),
-          icon: Icon(Icons.close),
-          label: Text('Reddet'),
-        ),
       ],
     );
   }
