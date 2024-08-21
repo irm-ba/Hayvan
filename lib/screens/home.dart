@@ -288,152 +288,184 @@ class _HomeState extends State<Home> {
     return query.snapshots();
   }
 
-  void _showFilterDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Filtreleme Seçenekleri'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButton<String>(
-                value: selectedAnimalType.isEmpty ? null : selectedAnimalType,
-                hint: Text('Hayvan Türü Seçin'),
-                items: <String>[
-                  'Kedi',
-                  'Köpek',
-                  'Kuş',
-                  'Tavşan',
-                  'Hamster',
-                  'Diğer'
-                ].map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedAnimalType = value ?? '';
-                  });
-                },
-              ),
-              TextFormField(
-                decoration:
-                    InputDecoration(labelText: 'Yaş Aralığı (örn. 1-5)'),
-                initialValue: ageRange,
-                onChanged: (value) {
-                  setState(() {
-                    ageRange = value;
-                  });
-                },
-              ),
-              DropdownButton<String>(
-                value: location.isEmpty ? null : location,
-                hint: Text('Konum Seçin'),
-                items: [
-                  'Adana',
-                  'Adıyaman',
-                  'Afyonkarahisar',
-                  'Ağrı',
-                  'Aksaray',
-                  'Amasya',
-                  'Ankara',
-                  'Antalya',
-                  'Artvin',
-                  'Aydın',
-                  'Balıkesir',
-                  'Bartın',
-                  'Batman',
-                  'Bayburt',
-                  'Bilecik',
-                  'Bingöl',
-                  'Bitlis',
-                  'Bolu',
-                  'Burdur',
-                  'Bursa',
-                  'Çanakkale',
-                  'Çankırı',
-                  'Çorum',
-                  'Denizli',
-                  'Diyarbakır',
-                  'Düzce',
-                  'Edirne',
-                  'Elazığ',
-                  'Erzincan',
-                  'Erzurum',
-                  'Eskişehir',
-                  'Gaziantep',
-                  'Giresun',
-                  'Gümüşhane',
-                  'Hakkari',
-                  'Hatay',
-                  'Iğdır',
-                  'Isparta',
-                  'İstanbul',
-                  'İzmir',
-                  'Kahramanmaraş',
-                  'Karabük',
-                  'Karaman',
-                  'Kars',
-                  'Kastamonu',
-                  'Ordu',
-                  'Osmaniye',
-                  'Rize',
-                  'Sakarya',
-                  'Samsun',
-                  'Şanlıurfa',
-                  'Şırnak',
-                  'Sinop',
-                  'Sivas',
-                  'Tekirdağ',
-                  'Tokat',
-                  'Trabzon',
-                  'Tunceli',
-                  'Uşak',
-                  'Van',
-                  'Yalova',
-                  'Yozgat',
-                  'Zonguldak',
-                ].map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    location = value ?? '';
-                  });
-                },
-              ),
-            ],
+void _showFilterDialog() {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Filtrele'),
+        content: StatefulBuilder(
+          builder: (context, setState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Hayvan türü seçimi
+                DropdownButton<String>(
+                  value: selectedAnimalType.isNotEmpty
+                      ? selectedAnimalType
+                      : null,
+                  hint: Text('Hayvan Türü'),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedAnimalType = newValue ?? '';
+                    });
+                  },
+                  items: [
+                    'Kedi',
+                    'Köpek',
+                    'Kuş',
+                    'Balık',
+                    'Hamster',
+                    'Tavşan',
+                    'Kaplumbağa',
+                    'Yılan',
+                    'Kertenkele',
+                    'Sürüngen',
+                    'Böcek',
+                    'Diğer'
+                  ].map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+                // Yaş aralığı seçimi
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: 'Yaş Aralığı (ör. 1-5)',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      ageRange = value;
+                    });
+                  },
+                ),
+                // Konum seçimi
+                DropdownButton<String>(
+                  value: location.isNotEmpty ? location : null,
+                  hint: Text('Konum'),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      location = newValue ?? '';
+                    });
+                  },
+                  items: [
+                    'Adana',
+                    'Adıyaman',
+                    'Afyonkarahisar',
+                    'Ağrı',
+                    'Aksaray',
+                    'Amasya',
+                    'Ankara',
+                    'Antalya',
+                    'Ardahan',
+                    'Artvin',
+                    'Aydın',
+                    'Balıkesir',
+                    'Bartın',
+                    'Batman',
+                    'Bayburt',
+                    'Bilecik',
+                    'Bingöl',
+                    'Bitlis',
+                    'Bolu',
+                    'Burdur',
+                    'Bursa',
+                    'Çanakkale',
+                    'Çankırı',
+                    'Çorum',
+                    'Denizli',
+                    'Diyarbakır',
+                    'Düzce',
+                    'Edirne',
+                    'Elazığ',
+                    'Erzincan',
+                    'Erzurum',
+                    'Eskişehir',
+                    'Gaziantep',
+                    'Giresun',
+                    'Gümüşhane',
+                    'Hakkari',
+                    'Hatay',
+                    'Iğdır',
+                    'Isparta',
+                    'İstanbul',
+                    'İzmir',
+                    'Kahramanmaraş',
+                    'Karabük',
+                    'Karaman',
+                    'Kars',
+                    'Kayseri',
+                    'Kırıkkale',
+                    'Kırklareli',
+                    'Kırşehir',
+                    'Kocaeli',
+                    'Konya',
+                    'Kütahya',
+                    'Malatya',
+                    'Manisa',
+                    'Mardin',
+                    'Mersin',
+                    'Muğla',
+                    'Muş',
+                    'Nevşehir',
+                    'Niğde',
+                    'Ordu',
+                    'Osmaniye',
+                    'Rize',
+                    'Sakarya',
+                    'Samsun',
+                    'Siirt',
+                    'Sinop',
+                    'Sivas',
+                    'Şanlıurfa',
+                    'Şırnak',
+                    'Tekirdağ',
+                    'Tokat',
+                    'Trabzon',
+                    'Tunceli',
+                    'Uşak',
+                    'Van',
+                    'Yalova',
+                    'Yozgat',
+                    'Zonguldak'
+                  ].map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ],
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            child: Text('İptal'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              setState(() {
+                // İptal butonuna basıldığında filtreleme değerlerini sıfırla
+                selectedAnimalType = '';
+                ageRange = '';
+                location = '';
+              });
+            },
           ),
-          actions: [
-            ElevatedButton(
-              child: Text('Uygula'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                setState(() {}); // Filtreleme sonrası yenileme
-              },
-              style: ElevatedButton.styleFrom(),
-            ),
-            TextButton(
-              child: Text('İptal'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                setState(() {
-                  // Filtreleme kriterlerini sıfırla
-                  selectedAnimalType = '';
-                  ageRange = '';
-                  location = '';
-                });
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+          TextButton(
+            child: Text('Uygula'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              setState(() {
+                // Filtreleme değerlerini güncelle
+              });
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 }
