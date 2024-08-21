@@ -69,7 +69,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Profil Düzenle'),
-        backgroundColor: Colors.purple,
       ),
       body: _userData == null
           ? Center(child: CircularProgressIndicator())
@@ -120,7 +119,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       onPressed: _saveProfile,
                       child: Text('Değişiklikleri Kaydet'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.purple,
+                        backgroundColor: Color.fromARGB(255, 147, 58, 142),
                         foregroundColor: Colors.white,
                       ),
                     ),
