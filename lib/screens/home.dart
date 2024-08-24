@@ -151,17 +151,6 @@ class _HomeState extends State<Home> {
             child:
                 Text('Felvera', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
-          actions: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              child: IconButton(
-                icon: Icon(Icons.filter_list),
-                onPressed: () {
-                  _showFilterDialog();
-                },
-              ),
-            ),
-          ],
         ),
         body: Column(
           children: [
