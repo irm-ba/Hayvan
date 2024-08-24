@@ -6,11 +6,13 @@ class ChatPage extends StatefulWidget {
   final String conversationId;
   final String receiverId;
   final String receiverName;
+  final String senderName;
 
   const ChatPage({
     required this.conversationId,
     required this.receiverId,
     required this.receiverName,
+    required this.senderName,
     Key? key,
   }) : super(key: key);
 
@@ -31,7 +33,7 @@ class _ChatPageState extends State<ChatPage> {
     _fetchReceiverProfileImage();
   }
 
-  void _fetchReceiverProfileImage() async {
+  Future<void> _fetchReceiverProfileImage() async {
     try {
       final userDoc =
           await _firestore.collection('users').doc(widget.receiverId).get();
@@ -45,14 +47,29 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  void _sendMessage() async {
-    if (_messageController.text.trim().isEmpty) return;
+  bool _containsPhoneNumber(String text) {
+    // Telefon numarası regexi
+    final phoneNumberRegex = RegExp(r'\b\d{10,13}\b');
+    return phoneNumberRegex.hasMatch(text);
+  }
+
+  Future<void> _sendMessage() async {
+    final messageText = _messageController.text.trim();
+    if (messageText.isEmpty) return;
+
+    if (_containsPhoneNumber(messageText)) {
+      // Telefon numarası içeriyorsa kullanıcıyı bilgilendir
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Telefon numarası paylaşmak yasaktır.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     final currentUserId = _auth.currentUser?.uid;
-
     if (currentUserId == null) return;
-
-    final messageText = _messageController.text;
 
     // Mesajı sohbete ekleyin
     await _firestore
@@ -77,10 +94,6 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
-      _sendMessage();
-    });
-
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -108,30 +121,6 @@ class _ChatPageState extends State<ChatPage> {
         ),
         child: Stack(
           children: [
-            Positioned(
-              top: -100,
-              left: -100,
-              child: Container(
-                width: 250,
-                height: 250,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color.fromARGB(255, 200, 200, 200).withOpacity(0.3),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: -50,
-              right: -50,
-              child: Container(
-                width: 200,
-                height: 200,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color.fromARGB(255, 200, 200, 200).withOpacity(0.3),
-                ),
-              ),
-            ),
             Column(
               children: [
                 Expanded(

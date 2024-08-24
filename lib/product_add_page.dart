@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'models/lost_animal_data.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -454,6 +455,8 @@ class _LostAnimalAddState extends State<LostAnimalAdd> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController breedController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController ageController = TextEditingController();
+  final TextEditingController animalTypeController = TextEditingController();
   String? selectedLocation;
   bool isGenderMale = true;
   List<File> _images = [];
@@ -466,7 +469,9 @@ class _LostAnimalAddState extends State<LostAnimalAdd> {
       if (pickedFile != null) {
         _images.add(File(pickedFile.path));
       } else {
-        print('Resim seçilmedi');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Resim seçilmedi')),
+        );
       }
     });
   }
@@ -485,6 +490,9 @@ class _LostAnimalAddState extends State<LostAnimalAdd> {
       return await storageRef.getDownloadURL();
     } catch (e) {
       print('Dosya yükleme hatası: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Dosya yükleme sırasında bir hata oluştu.')),
+      );
       return null;
     }
   }
@@ -493,9 +501,7 @@ class _LostAnimalAddState extends State<LostAnimalAdd> {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Kullanıcı oturum açmamış.'),
-        ),
+        SnackBar(content: Text('Kullanıcı oturum açmamış.')),
       );
       return;
     }
@@ -504,20 +510,19 @@ class _LostAnimalAddState extends State<LostAnimalAdd> {
         breedController.text.isEmpty ||
         descriptionController.text.isEmpty ||
         _images.isEmpty ||
-        selectedLocation == null) {
+        selectedLocation == null ||
+        ageController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content:
-              Text('Lütfen tüm zorunlu alanları doldurun ve resim ekleyin.'),
-        ),
+            content:
+                Text('Lütfen tüm zorunlu alanları doldurun ve resim ekleyin.')),
       );
       return;
     }
 
-    String userId = user.uid; // Kullanıcının ID'sini al
-    String lostAnimalId = Uuid().v4(); // Benzersiz bir kimlik
+    String userId = user.uid;
+    String lostAnimalId = Uuid().v4();
 
-    // Fotoğrafları Firebase Storage'a yükleyin
     List<String> imageUrls = [];
     for (var image in _images) {
       var imageUrl = await _uploadFile(image, 'lost_animal_images');
@@ -528,40 +533,45 @@ class _LostAnimalAddState extends State<LostAnimalAdd> {
       name: nameController.text,
       breed: breedController.text,
       isGenderMale: isGenderMale,
+      age: int.parse(ageController.text),
       imageUrls: imageUrls,
       description: descriptionController.text,
       location: selectedLocation!,
       userId: userId,
       lostAnimalId: lostAnimalId,
+      animalType: animalTypeController.text.isNotEmpty
+          ? animalTypeController.text
+          : 'Belirtilmemiş',
     );
 
-    // Firestore'a veri ekleme
     final firestore = FirebaseFirestore.instance;
     await firestore.collection('lost_animals').doc(lostAnimalId).set({
       'name': newLostAnimal.name,
       'breed': newLostAnimal.breed,
       'isGenderMale': newLostAnimal.isGenderMale,
+      'age': newLostAnimal.age,
       'imageUrls': newLostAnimal.imageUrls,
       'description': newLostAnimal.description,
       'location': newLostAnimal.location,
       'userId': newLostAnimal.userId,
       'lostAnimalId': newLostAnimal.lostAnimalId,
+      'animalType': newLostAnimal.animalType,
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Kayıp hayvan ilanı başarıyla eklendi!'),
-      ),
+      SnackBar(content: Text('Kayıp hayvan ilanı başarıyla eklendi!')),
     );
 
     // Formu sıfırlama
     nameController.clear();
     breedController.clear();
     descriptionController.clear();
+    ageController.clear();
+    animalTypeController.clear();
     setState(() {
       _images.clear();
       selectedLocation = null;
-      isGenderMale = true; // Default gender
+      isGenderMale = true;
     });
   }
 
@@ -647,119 +657,104 @@ class _LostAnimalAddState extends State<LostAnimalAdd> {
       'Zonguldak'
     ];
 
-    return SingleChildScrollView(
+    return ListView(
       padding: EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          TextField(
-            controller: nameController,
-            decoration: InputDecoration(labelText: 'Hayvan Adı'),
-          ),
-          TextField(
-            controller: breedController,
-            decoration: InputDecoration(labelText: 'Cinsi'),
-          ),
-          TextField(
-            controller: descriptionController,
-            decoration: InputDecoration(labelText: 'Açıklama'),
-          ),
-          DropdownButtonFormField<String>(
-            value: selectedLocation,
-            decoration: InputDecoration(labelText: 'Konum'),
-            items: cities.map((String city) {
-              return DropdownMenuItem<String>(
-                value: city,
-                child: Text(city),
-              );
-            }).toList(),
-            onChanged: (newValue) {
-              setState(() {
-                selectedLocation = newValue;
-              });
-            },
-          ),
-          Row(
-            children: [
-              Text('Cinsiyet: '),
-              Radio(
-                value: true,
-                groupValue: isGenderMale,
-                onChanged: (bool? value) {
-                  setState(() {
-                    isGenderMale = value ?? true;
-                  });
-                },
-              ),
-              Text('Erkek'),
-              Radio(
-                value: false,
-                groupValue: isGenderMale,
-                onChanged: (bool? value) {
-                  setState(() {
-                    isGenderMale = value ?? false;
-                  });
-                },
-              ),
-              Text('Dişi'),
-            ],
-          ),
-          ElevatedButton(
-            onPressed: _getImage,
-            child: Text('Resim Seç'),
-          ),
-          _images.isEmpty
-              ? Text('Resim seçilmedi')
-              : Wrap(
-                  spacing: 8.0,
-                  children: List.generate(_images.length, (index) {
-                    return Stack(
-                      children: [
-                        Image.file(
-                          _images[index],
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
+      children: [
+        TextField(
+          controller: nameController,
+          decoration: InputDecoration(labelText: 'Hayvan Adı'),
+        ),
+        TextField(
+          controller: breedController,
+          decoration: InputDecoration(labelText: 'Cinsi'),
+        ),
+        TextField(
+          controller: ageController,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(labelText: 'Yaşı'),
+        ),
+        TextField(
+          controller: descriptionController,
+          decoration: InputDecoration(labelText: 'Açıklama'),
+        ),
+        TextField(
+          controller: animalTypeController,
+          decoration: InputDecoration(labelText: 'Hayvan Türü'),
+        ),
+        DropdownButtonFormField<String>(
+          value: selectedLocation,
+          decoration: InputDecoration(labelText: 'Konum'),
+          items: cities.map((String city) {
+            return DropdownMenuItem<String>(
+              value: city,
+              child: Text(city),
+            );
+          }).toList(),
+          onChanged: (newValue) {
+            setState(() {
+              selectedLocation = newValue;
+            });
+          },
+        ),
+        Row(
+          children: [
+            Text('Cinsiyet: '),
+            Radio(
+              value: true,
+              groupValue: isGenderMale,
+              onChanged: (bool? value) {
+                setState(() {
+                  isGenderMale = value ?? true;
+                });
+              },
+            ),
+            Text('Erkek'),
+            Radio(
+              value: false,
+              groupValue: isGenderMale,
+              onChanged: (bool? value) {
+                setState(() {
+                  isGenderMale = value ?? false;
+                });
+              },
+            ),
+            Text('Dişi'),
+          ],
+        ),
+        ElevatedButton(
+          onPressed: _getImage,
+          child: Text('Resim Seç'),
+        ),
+        _images.isEmpty
+            ? Text('Resim seçilmedi')
+            : Wrap(
+                spacing: 8.0,
+                children: List.generate(_images.length, (index) {
+                  return Stack(
+                    children: [
+                      Image.file(
+                        _images[index],
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      ),
+                      Positioned(
+                        right: 0,
+                        child: IconButton(
+                          icon: Icon(Icons.remove_circle),
+                          onPressed: () => _removeImage(index),
                         ),
-                        Positioned(
-                          right: 0,
-                          child: IconButton(
-                            icon: Icon(Icons.remove_circle),
-                            onPressed: () => _removeImage(index),
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
-                ),
-          SizedBox(height: 16.0),
-          ElevatedButton(
-            onPressed: _submitForm,
-            child: Text('Kayıp İlanını Gönder'),
-          ),
-        ],
-      ),
+                      ),
+                    ],
+                  );
+                }),
+              ),
+        SizedBox(height: 16.0),
+        ElevatedButton(
+          onPressed: _submitForm,
+          child: Text('İlanı Gönder'),
+        ),
+      ],
     );
   }
-}
-
-class LostAnimalData {
-  final String name;
-  final String breed;
-  final bool isGenderMale;
-  final List<String> imageUrls;
-  final String description;
-  final String location;
-  final String userId;
-  final String lostAnimalId;
-
-  LostAnimalData({
-    required this.name,
-    required this.breed,
-    required this.isGenderMale,
-    required this.imageUrls,
-    required this.description,
-    required this.location,
-    required this.userId,
-    required this.lostAnimalId,
-  });
 }

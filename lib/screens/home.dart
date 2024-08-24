@@ -10,6 +10,7 @@ import 'package:pet_adoption/models/pet_data.dart';
 import 'package:pet_adoption/aboutpage.dart';
 import 'package:pet_adoption/widgets/CustomBottomNavigationBar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pet_adoption/widgets/lostanimalpge.dart';
 import '../widgets/pet_grid_list.dart';
 import '../login.dart';
 import '../forum.dart';
@@ -34,223 +35,223 @@ class _HomeState extends State<Home> {
     return Padding(
       padding: EdgeInsets.only(top: 30),
       child: Scaffold(
-          bottomNavigationBar: CustomBottomNavigationBar(),
-          drawer: Drawer(
-            child: Column(
-              children: [
-                DrawerHeader(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Color.fromARGB(255, 147, 58, 142), // Kbrown rengi
-                        Color.fromARGB(255, 169, 85, 210) // İkinci renk
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      stops: [0.3, 0.7], // Geçişlerin belirgin olduğu noktalar
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Menu',
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 255, 255, 255),
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: ListView(
-                    padding: EdgeInsets.zero,
-                    children: [
-                      ListTile(
-                        leading: Icon(Icons.person,
-                            color: Color.fromARGB(255, 147, 58, 142)),
-                        title: Text('Profil'),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => AccountPage()),
-                          );
-                        },
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.announcement_outlined,
-                            color: Color.fromARGB(255, 147, 58, 142)),
-                        title: Text('Bize Ulaşın'),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ContactPage()),
-                          );
-                        },
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.accessibility_new_sharp,
-                            color: Color.fromARGB(255, 147, 58, 142)),
-                        title: Text('Hakkımızda'),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => AboutUsPage()),
-                          );
-                        },
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.chat_outlined,
-                            color: Color.fromARGB(255, 147, 58, 142)),
-                        title: Text('Mesaj'),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ChatListPage()),
-                          );
-                        },
-                      ),
-                      Divider(),
-                      ListTile(
-                        leading: Icon(Icons.logout_rounded,
-                            color: Color.fromARGB(255, 147, 58, 142)),
-                        title: Text('Çıkış yap'),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => LoginPage()),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          appBar: AppBar(
-            leading: Builder(
-              builder: (BuildContext context) {
-                return Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.white,
-                    radius: 20,
-                    child: IconButton(
-                      icon: Icon(Icons.menu_rounded, color: kBrownColor),
-                      onPressed: () {
-                        Scaffold.of(context).openDrawer();
-                      },
-                    ),
-                  ),
-                );
-              },
-            ),
-            title: Center(
-              child: Text('Felvera'),
-            ),
-            actions: [
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: 8.0), // İkon ve yazı arasında boşluk
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.filter_list),
-                      onPressed: () {
-                        _showFilterDialog();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          body: Column(
+        bottomNavigationBar: CustomBottomNavigationBar(),
+        drawer: Drawer(
+          child: Column(
             children: [
-              /// Categories
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color.fromARGB(255, 147, 58, 142), // Kbrown rengi
+                      Color.fromARGB(255, 169, 85, 210) // İkinci renk
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    stops: [0.3, 0.7], // Geçişlerin belirgin olduğu noktalar
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    'Menu',
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 255, 255, 255),
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
                   children: [
-                    _buildCategoryButton('Tüm İlanlar'),
-                    _buildCategoryButton('Kayıp İlanları'),
-                    _buildCategoryButton(
-                        'Gönüllülük Etkinlikleri'), // Bu seçeneği değiştirdik
-                    _buildCategoryButton('Forum'),
-                    _buildCategoryButton('Blog'), // Blog seçeneği ekliyoruz
+                    ListTile(
+                      leading: Icon(Icons.person,
+                          color: Color.fromARGB(255, 147, 58, 142)),
+                      title: Text('Profil'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AccountPage()),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.announcement_outlined,
+                          color: Color.fromARGB(255, 147, 58, 142)),
+                      title: Text('Bize Ulaşın'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ContactPage()),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.accessibility_new_sharp,
+                          color: Color.fromARGB(255, 147, 58, 142)),
+                      title: Text('Hakkımızda'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AboutUsPage()),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.chat_outlined,
+                          color: Color.fromARGB(255, 147, 58, 142)),
+                      title: Text('Mesaj'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ChatListPage()),
+                        );
+                      },
+                    ),
+                    Divider(),
+                    ListTile(
+                      leading: Icon(Icons.logout_rounded,
+                          color: Color.fromARGB(255, 147, 58, 142)),
+                      title: Text('Çıkış yap'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => LoginPage()),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-
-              Expanded(
-                child: selectedCategory == 'Blog'
-                    ? BlogPage() // Blog sayfasını burada gösteriyoruz
-                    : selectedCategory == 'Forum'
-                        ? ForumPage()
-                        : selectedCategory ==
-                                'Gönüllülük Etkinlikleri' // Burayı da değiştirdik
-                            ? EventPage() // EventPage, Gönüllülük Etkinlikleri olarak değiştirildi
-                            : StreamBuilder(
-                                stream: _getCategoryStream(selectedCategory),
-                                builder: (context,
-                                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return Center(
-                                        child: CircularProgressIndicator());
-                                  }
-                                  if (snapshot.hasError) {
-                                    return Center(
-                                        child: Text(
-                                            'Hata oluştu: ${snapshot.error}'));
-                                  }
-                                  if (!snapshot.hasData ||
-                                      snapshot.data!.docs.isEmpty) {
-                                    return Center(
-                                      child: Text(
-                                        selectedCategory ==
-                                                'Gönüllülük Etkinlikleri'
-                                            ? 'Henüz gönüllülük etkinliği bulunmamaktadır.'
-                                            : 'Hiç hayvan bulunamadı.',
-                                      ),
-                                    );
-                                  }
-
-                                  // Firestore'dan gelen verileri PetData listesine dönüştürme
-                                  List<PetData> pets = snapshot.data!.docs
-                                      .map((DocumentSnapshot doc) {
-                                    return PetData.fromSnapshot(doc);
-                                  }).toList();
-
-                                  return PetGridList(pets: pets);
-                                },
-                              ),
-              ),
             ],
-          )),
+          ),
+        ),
+        appBar: AppBar(
+          leading: Builder(
+            builder: (context) => Padding(
+              padding: EdgeInsets.all(8.0),
+              child: CircleAvatar(
+                radius: 20,
+                child: IconButton(
+                  icon: Icon(Icons.menu_rounded, color: kBrownColor),
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
+                  },
+                ),
+              ),
+            ),
+          ),
+          title: Center(
+            child:
+                Text('Felvera', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          actions: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              child: IconButton(
+                icon: Icon(Icons.filter_list),
+                onPressed: () {
+                  _showFilterDialog();
+                },
+              ),
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            /// Kategoriler
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildCategoryButton('Tüm İlanlar'),
+                  _buildCategoryButton('Kayıp İlanları'),
+                  _buildCategoryButton('Gönüllülük Etkinlikleri'),
+                  _buildCategoryButton('Forum'),
+                  _buildCategoryButton('Blog'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            Expanded(
+              child: selectedCategory == 'Blog'
+                  ? BlogPage()
+                  : selectedCategory == 'Forum'
+                      ? ForumPage()
+                      : selectedCategory == 'Gönüllülük Etkinlikleri'
+                          ? EventPage()
+                          : selectedCategory == 'Kayıp İlanları'
+                              ? LostAnimalsPage()
+                              : StreamBuilder(
+                                  stream: _getCategoryStream(selectedCategory),
+                                  builder: (context,
+                                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return Center(
+                                          child: CircularProgressIndicator());
+                                    }
+                                    if (snapshot.hasError) {
+                                      return Center(
+                                          child: Text(
+                                              'Hata oluştu: ${snapshot.error}'));
+                                    }
+                                    if (!snapshot.hasData ||
+                                        snapshot.data!.docs.isEmpty) {
+                                      return Center(
+                                        child: Text(
+                                          selectedCategory ==
+                                                  'Gönüllülük Etkinlikleri'
+                                              ? 'Henüz gönüllülük etkinliği bulunmamaktadır.'
+                                              : 'Hiç hayvan bulunamadı.',
+                                        ),
+                                      );
+                                    }
+
+                                    // Firestore'dan gelen verileri PetData listesine dönüştürme
+                                    List<PetData> pets = snapshot.data!.docs
+                                        .map((DocumentSnapshot doc) {
+                                      return PetData.fromSnapshot(doc);
+                                    }).toList();
+
+                                    return PetGridList(pets: pets);
+                                  },
+                                ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildCategoryButton(String category) {
+  Widget _buildCategoryButton(String category, {bool isNavigable = false}) {
     return GestureDetector(
       onTap: () {
-        setState(() {
-          selectedCategory = category;
-        });
+        if (category == 'Kayıp İlanları' && isNavigable) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LostAnimalsPage()),
+          );
+        } else {
+          setState(() {
+            selectedCategory = category;
+          });
+        }
       },
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 10),
         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
         decoration: BoxDecoration(
-          color: selectedCategory == category ? kBrownColor : Colors.grey[300],
+          color: selectedCategory == category
+              ? Color.fromARGB(255, 147, 58, 142)
+              : Colors.grey[300],
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(

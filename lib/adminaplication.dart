@@ -324,6 +324,7 @@ class _AdminApplicationState extends State<AdminApplication> {
                     receiverId: receiverId!,
                     receiverName:
                         '${_userData?['firstName']} ${_userData?['lastName']}',
+                    senderName: '',
                   ),
                 ),
               );

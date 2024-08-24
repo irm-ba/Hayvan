@@ -13,7 +13,6 @@ class PetGridList extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Son Eklenen Hayvanlar'),
-        backgroundColor: Colors.white, // Arka plan rengi beyaz
       ),
       body: GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

@@ -119,6 +119,7 @@ class _ChatListPageState extends State<ChatListPage> {
                               conversationId: conversationId,
                               receiverId: receiverId,
                               receiverName: receiverName,
+                              senderName: '',
                             ),
                           ),
                         );

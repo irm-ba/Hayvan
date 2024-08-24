@@ -13,7 +13,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
-  final _phoneNumberController = TextEditingController();
   final _bioController = TextEditingController();
 
   User? _currentUser;
@@ -38,8 +37,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
         if (_userData != null) {
           _firstNameController.text = _userData!['firstName'] ?? '';
           _lastNameController.text = _userData!['lastName'] ?? '';
-          _phoneNumberController.text = _userData!['phoneNumber'] ?? '';
           _bioController.text = _userData!['bio'] ?? '';
+          // Telefon numarasını almayı kaldırdık
         }
       });
     }
@@ -54,8 +53,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             .update({
           'firstName': _firstNameController.text,
           'lastName': _lastNameController.text,
-          'phoneNumber': _phoneNumberController.text,
           'bio': _bioController.text,
+          // Telefon numarasını güncellemelerden çıkardık
         });
         Navigator.pop(context); // Profili kaydettikten sonra geri dön
       } catch (e) {
@@ -99,17 +98,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         return null;
                       },
                     ),
-                    TextFormField(
-                      controller: _phoneNumberController,
-                      decoration:
-                          InputDecoration(labelText: 'Telefon Numarası'),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Bu alan boş bırakılamaz';
-                        }
-                        return null;
-                      },
-                    ),
+                    // Telefon numarasını kaldırdık
+                    // TextFormField(
+                    //   controller: _phoneNumberController,
+                    //   decoration:
+                    //       InputDecoration(labelText: 'Telefon Numarası'),
+                    //   validator: (value) {
+                    //     if (value == null || value.isEmpty) {
+                    //       return 'Bu alan boş bırakılamaz';
+                    //     }
+                    //     return null;
+                    //   },
+                    // ),
                     TextFormField(
                       controller: _bioController,
                       decoration: InputDecoration(labelText: 'Biyografi'),
@@ -134,7 +134,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
-    _phoneNumberController.dispose();
     _bioController.dispose();
     super.dispose();
   }
