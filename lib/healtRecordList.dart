@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class HealthRecord {
@@ -36,13 +37,26 @@ class HealthRecordList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text("Sağlık Kayıtları"),
+        ),
+        body: const Center(child: Text('Lütfen giriş yapın.')),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Sağlık Kayıtları"),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream:
-            FirebaseFirestore.instance.collection('healthRecords').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('healthRecords')
+            .where('userId', isEqualTo: user.uid) // Kullanıcıya göre filtrele
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(

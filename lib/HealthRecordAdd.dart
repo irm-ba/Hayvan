@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 class HealthRecord {
   final String petId;
+  final String userId; // Kullanıcı UID'si
   final Timestamp date;
   final String description;
   final String treatment;
@@ -12,6 +13,7 @@ class HealthRecord {
 
   HealthRecord({
     required this.petId,
+    required this.userId, // Yeni parametre
     required this.date,
     required this.description,
     required this.treatment,
@@ -22,6 +24,7 @@ class HealthRecord {
   Map<String, dynamic> toMap() {
     return {
       'petId': petId,
+      'userId': userId, // Firebase'e kaydedilecek
       'date': date,
       'description': description,
       'treatment': treatment,
@@ -45,39 +48,21 @@ class _HealthRecordAddState extends State<HealthRecordAdd> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController treatmentController = TextEditingController();
   final TextEditingController veterinarianNameController =
-      TextEditingController();
+  TextEditingController();
   final TextEditingController healthStatusController = TextEditingController();
 
-  Future<void> _selectDate() async {
-    // Tarih seçici penceresini aç
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(), // Başlangıç tarihi olarak bugünü ayarla
-      firstDate: DateTime(2000), // En erken tarih olarak yıl 2000'i ayarla
-      lastDate: DateTime(2101), // En geç tarih olarak yıl 2101'i ayarla
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            primaryColor: Colors.purple, // Ana renk olarak moru ayarla
-            colorScheme: ColorScheme.light(
-                primary: Colors.purple), // İkincil renk olarak moru ayarla
-            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    // Seçilen tarihi kontrol et ve formu güncelle
-    if (picked != null && picked != DateTime.now()) {
-      setState(() {
-        dateController.text = DateFormat('dd-MM-yyyy')
-            .format(picked); // Tarihi 'gg-aa-yyyy' formatında ayarla
-      });
-    }
-  }
-
   void _submitForm() async {
+    // Firebase Authentication üzerinden giriş yapan kullanıcının UID'sini alın
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lütfen giriş yapın.'),
+        ),
+      );
+      return;
+    }
+
     if (dateController.text.isEmpty ||
         descriptionController.text.isEmpty ||
         treatmentController.text.isEmpty ||
@@ -91,18 +76,18 @@ class _HealthRecordAddState extends State<HealthRecordAdd> {
       return;
     }
 
+    final healthRecord = HealthRecord(
+      petId: widget.petId,
+      userId: user.uid, // Kullanıcı UID'si
+      date: Timestamp.fromDate(DateTime.parse(dateController.text)),
+      description: descriptionController.text,
+      treatment: treatmentController.text,
+      veterinarianName: veterinarianNameController.text,
+      healthStatus: healthStatusController.text,
+    );
+
     try {
-      final date = DateFormat('dd-MM-yyyy').parse(dateController.text);
-
-      final healthRecord = HealthRecord(
-        petId: widget.petId,
-        date: Timestamp.fromDate(date),
-        description: descriptionController.text,
-        treatment: treatmentController.text,
-        veterinarianName: veterinarianNameController.text,
-        healthStatus: healthStatusController.text,
-      );
-
+      // Firestore'a yeni sağlık kaydını ekle
       await FirebaseFirestore.instance
           .collection('healthRecords')
           .add(healthRecord.toMap());
@@ -113,6 +98,7 @@ class _HealthRecordAddState extends State<HealthRecordAdd> {
         ),
       );
 
+      // Formu sıfırlamak için gerekli kontrolleri ekleyebilirsiniz (isteğe bağlı)
       dateController.clear();
       descriptionController.clear();
       treatmentController.clear();
@@ -145,17 +131,12 @@ class _HealthRecordAddState extends State<HealthRecordAdd> {
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               SizedBox(height: 10),
-              GestureDetector(
-                onTap: _selectDate,
-                child: AbsorbPointer(
-                  child: TextField(
-                    controller: dateController,
-                    decoration: InputDecoration(
-                      hintText: "GG-AA-YYYY", // Türkçe format: GG-AA-YYYY
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
+              TextField(
+                controller: dateController,
+                decoration: InputDecoration(
+                  hintText: "YYYY-MM-DD",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ),
@@ -222,7 +203,11 @@ class _HealthRecordAddState extends State<HealthRecordAdd> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitForm,
-                child: Text("Ekle"),
+                child: Text("Ekle",),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Color.fromARGB(255, 255, 255, 255),
+                  backgroundColor: Color.fromARGB(255, 147, 58, 142),
+              ),
               ),
             ],
           ),
@@ -230,4 +215,13 @@ class _HealthRecordAddState extends State<HealthRecordAdd> {
       ),
     );
   }
+}
+
+// Sağlık kayıtlarını yalnızca giriş yapan kullanıcıya göre getiren fonksiyon
+Stream<QuerySnapshot> getUserHealthRecords() {
+  final user = FirebaseAuth.instance.currentUser;
+  return FirebaseFirestore.instance
+      .collection('healthRecords')
+      .where('userId', isEqualTo: user!.uid)
+      .snapshots();
 }

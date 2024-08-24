@@ -268,6 +268,9 @@ class _HomeState extends State<Home> {
           .snapshots();
     }
 
+    // `status` alanı "onaylandı" olan hayvanları hariç tutma
+    query = query.where('status', isNotEqualTo: 'Onaylandı');
+
     // Filtreleme kriterlerini uygulama
     if (selectedAnimalType.isNotEmpty) {
       query = query.where('animalType', isEqualTo: selectedAnimalType);

@@ -84,16 +84,32 @@ class _AdminApplicationState extends State<AdminApplication> {
 
   Future<void> _updateApplicationStatus(String status) async {
     try {
+      // Başvuru durumunu güncelle
       await FirebaseFirestore.instance
           .collection('adoption_applications')
           .doc(widget.applicationId)
           .update({'status': status});
+
+      // Pet'in durumunu güncelle
+      String petId = _applicationData?['petId'] ?? '';
+      if (status == 'Onaylandı') {
+        await FirebaseFirestore.instance
+            .collection('pet')
+            .doc(petId)
+            .update({'status': 'Adoptions'});
+      } else if (status == 'Reddedildi') {
+        await FirebaseFirestore.instance
+            .collection('pet')
+            .doc(petId)
+            .update({'status': 'Available'}); // veya uygun bir değer
+      }
 
       setState(() {
         _applicationData?['status'] = status;
       });
     } catch (e) {
       // Hata işleme kodunu burada ekleyebilirsiniz.
+      print('Hata: $e');
     }
   }
 

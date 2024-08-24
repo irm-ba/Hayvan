@@ -35,7 +35,7 @@ class _PetGridListState extends State<PetGridList> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Bir hata oluştu'));
+            return Center(child: Text('Bir hata oluştu: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text('Görüntülenecek hayvan yok'));
           } else {
@@ -67,10 +67,7 @@ class _PetGridListState extends State<PetGridList> {
                     decoration: BoxDecoration(
                       color: const Color.fromARGB(255, 147, 97, 150),
                       gradient: const LinearGradient(
-                        colors: [
-                          Colors.black12,
-                          Colors.black54,
-                        ],
+                        colors: [Colors.black12, Colors.black54],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomCenter,
                       ),
@@ -149,10 +146,8 @@ class _PetGridListState extends State<PetGridList> {
   Stream<List<PetData>> _getFilteredPetsStream() {
     CollectionReference collection =
         FirebaseFirestore.instance.collection('pet');
+    Query query = collection.where('status', isNotEqualTo: 'Adoptions');
 
-    Query query = collection;
-
-    // Apply filters
     if (selectedAnimalType.isNotEmpty) {
       query = query.where('animalType', isEqualTo: selectedAnimalType);
     }
@@ -172,8 +167,9 @@ class _PetGridListState extends State<PetGridList> {
       query = query.where('location', isEqualTo: location);
     }
 
-    return query.snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => PetData.fromSnapshot(doc)).toList());
+    return query.snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) => PetData.fromSnapshot(doc)).toList();
+    });
   }
 
   void _showFilterDialog() {
@@ -187,7 +183,6 @@ class _PetGridListState extends State<PetGridList> {
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Hayvan türü seçimi
                   DropdownButton<String>(
                     value: selectedAnimalType.isNotEmpty
                         ? selectedAnimalType
@@ -218,7 +213,6 @@ class _PetGridListState extends State<PetGridList> {
                       );
                     }).toList(),
                   ),
-                  // Yaş aralığı seçimi
                   TextField(
                     decoration: InputDecoration(
                       labelText: 'Yaş Aralığı (ör. 1-5)',
@@ -229,7 +223,6 @@ class _PetGridListState extends State<PetGridList> {
                       });
                     },
                   ),
-                  // Konum seçimi
                   DropdownButton<String>(
                     value: location.isNotEmpty ? location : null,
                     hint: Text('Konum'),

@@ -4,6 +4,7 @@ import 'package:pet_adoption/vaccination_schedule_add.dart';
 import 'package:pet_adoption/vaccination_schedule_list.dart';
 import 'package:pet_adoption/vet_visit_add.dart';
 import 'package:pet_adoption/vet_visit_list.dart';
+
 import 'package:pet_adoption/widgets/HealthRecordAdd.dart';
 import 'package:pet_adoption/widgets/healtRecordList.dart';
 
@@ -27,7 +28,7 @@ class MyApp extends StatelessWidget {
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.purple,
+            backgroundColor: Color.fromARGB(255, 147, 58, 142),
             foregroundColor: Colors.white,
             padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -45,9 +46,11 @@ class MyApp extends StatelessWidget {
         ),
         appBarTheme: AppBarTheme(
           color: Colors.white,
-          iconTheme: IconThemeData(color: Colors.purple),
+          iconTheme: IconThemeData(
+            color: Color.fromARGB(255, 147, 58, 142),
+          ),
           titleTextStyle: TextStyle(
-            color: Colors.purple,
+            color: Color.fromARGB(255, 147, 58, 142),
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
@@ -133,14 +136,18 @@ class HomePage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 50, color: Colors.purple),
+              Icon(
+                icon,
+                size: 50,
+                color: Color.fromARGB(255, 147, 58, 142),
+              ),
               SizedBox(height: 16),
               Text(
                 title,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.purple,
+                  color: Color.fromARGB(255, 147, 58, 142),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -208,7 +215,7 @@ class HealthRecordHomePage extends StatelessWidget {
         icon: Icon(icon, size: 20),
         label: Text(title),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.purple,
+          backgroundColor: Color.fromARGB(255, 147, 58, 142),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
@@ -256,7 +263,7 @@ class VaccinationScheduleHomePage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const VaccinationScheduleList()),
+                      builder: (context) => VaccinationScheduleList()),
                 );
               },
             ),
@@ -277,7 +284,7 @@ class VaccinationScheduleHomePage extends StatelessWidget {
         icon: Icon(icon, size: 20),
         label: Text(title),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.purple,
+          backgroundColor: Color.fromARGB(255, 147, 58, 142),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
@@ -344,7 +351,7 @@ class VetVisitHomePage extends StatelessWidget {
         icon: Icon(icon, size: 20),
         label: Text(title),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.purple,
+          backgroundColor: Color.fromARGB(255, 147, 58, 142),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
