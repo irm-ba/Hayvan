@@ -146,29 +146,32 @@ class _PetGridListState extends State<PetGridList> {
   Stream<List<PetData>> _getFilteredPetsStream() {
     CollectionReference collection =
         FirebaseFirestore.instance.collection('pet');
-    Query query = collection.where('status', isNotEqualTo: 'Adoptions');
+    Query query = collection.where('status',
+        isEqualTo: 'Available'); // Status 'Available' olanları filtrele
 
-    if (selectedAnimalType.isNotEmpty) {
-      query = query.where('animalType', isEqualTo: selectedAnimalType);
-    }
-
-    if (ageRange.isNotEmpty) {
-      List<String> ageRangeParts = ageRange.split('-');
-      if (ageRangeParts.length == 2) {
-        int minAge = int.tryParse(ageRangeParts[0].trim()) ?? 0;
-        int maxAge = int.tryParse(ageRangeParts[1].trim()) ?? 0;
-        query = query
-            .where('age', isGreaterThanOrEqualTo: minAge)
-            .where('age', isLessThanOrEqualTo: maxAge);
-      }
-    }
-
-    if (location.isNotEmpty) {
-      query = query.where('location', isEqualTo: location);
-    }
-
+    // İlk olarak gerekli veri setini Firestore'dan çekiyoruz
     return query.snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) => PetData.fromSnapshot(doc)).toList();
+      final pets =
+          snapshot.docs.map((doc) => PetData.fromSnapshot(doc)).toList();
+
+      // Sunucu tarafında yaş aralığı ve konuma göre filtreleme yapıyoruz
+      return pets.where((pet) {
+        // Yaş aralığı kontrolü
+        final int petAge = pet.age;
+        final bool matchesAge = ageRange.isEmpty ||
+            (petAge >= (int.tryParse(ageRange.split('-')[0].trim()) ?? 0) &&
+                petAge <= (int.tryParse(ageRange.split('-')[1].trim()) ?? 100));
+
+        // Konum kontrolü
+        final bool matchesLocation =
+            location.isEmpty || pet.location == location;
+
+        // Hayvan türü kontrolü
+        final bool matchesAnimalType =
+            selectedAnimalType.isEmpty || pet.animalType == selectedAnimalType;
+
+        return matchesAge && matchesLocation && matchesAnimalType;
+      }).toList();
     });
   }
 

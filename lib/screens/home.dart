@@ -210,7 +210,9 @@ class _HomeState extends State<Home> {
                                       return PetData.fromSnapshot(doc);
                                     }).toList();
 
-                                    return PetGridList(pets: pets);
+                                    return PetGridList(
+                                        pets:
+                                            pets); // Burada pets parametresini geçiyoruz
                                   },
                                 ),
             ),

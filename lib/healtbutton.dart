@@ -5,9 +5,6 @@ import 'package:pet_adoption/vaccination_schedule_list.dart';
 import 'package:pet_adoption/vet_visit_add.dart';
 import 'package:pet_adoption/vet_visit_list.dart';
 
-import 'package:pet_adoption/widgets/HealthRecordAdd.dart';
-import 'package:pet_adoption/widgets/healtRecordList.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -33,9 +30,9 @@ class MyApp extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30), // Yuvarlatılmış köşeler
+              borderRadius: BorderRadius.circular(30),
             ),
-            elevation: 5, // Hafif gölge
+            elevation: 5,
           ),
         ),
         cardTheme: CardTheme(
@@ -69,7 +66,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ana Sayfa'),
+        title: Text('Sağlık Kaydı'), // Ana Sayfa yerine Sağlık Kaydı
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -78,18 +75,6 @@ class HomePage extends StatelessWidget {
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
           children: [
-            _buildCategoryCard(
-              context,
-              title: 'Sağlık Kaydı',
-              icon: Icons.medical_services,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => HealthRecordHomePage()),
-                );
-              },
-            ),
             _buildCategoryCard(
               context,
               title: 'Aşı Takvimi',
@@ -153,76 +138,6 @@ class HomePage extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class HealthRecordHomePage extends StatelessWidget {
-  const HealthRecordHomePage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Sağlık Kaydı'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _buildActionButton(
-              context,
-              title: 'Sağlık Kaydı Ekle',
-              icon: Icons.add,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const HealthRecordAdd(
-                          petId: 'PET_ID')), // Geçerli bir pet ID'si ekleyin
-                );
-              },
-            ),
-            SizedBox(height: 20),
-            _buildActionButton(
-              context,
-              title: 'Sağlık Kayıtlarını Görüntüle',
-              icon: Icons.visibility,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const HealthRecordList()),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButton(BuildContext context,
-      {required String title,
-      required IconData icon,
-      required VoidCallback onPressed}) {
-    return Container(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 20),
-        label: Text(title),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Color.fromARGB(255, 147, 58, 142),
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-          padding: EdgeInsets.symmetric(vertical: 16),
-          elevation: 5,
-          textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
     );
