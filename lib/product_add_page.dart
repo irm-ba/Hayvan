@@ -125,7 +125,6 @@ class _ProductAddState extends State<ProductAdd> {
       );
       return;
     }
-
     if (nameController.text.isEmpty ||
         breedController.text.isEmpty ||
         ageController.text.isEmpty ||
@@ -142,7 +141,6 @@ class _ProductAddState extends State<ProductAdd> {
       );
       return;
     }
-
     String userId = user.uid; // Kullanıcının ID'sini al
     String petId = Uuid().v4(); // Benzersiz bir kimlik
 
@@ -165,11 +163,11 @@ class _ProductAddState extends State<ProductAdd> {
       healthStatus: healthStatusController.text,
       healthCardImageUrl: healthCardUrl ?? '',
       description: descriptionController.text,
-      personalityTraits: 'Kişilik özellikleri eksik',
       animalType: animalTypeController.text,
       location: selectedLocation!,
       userId: userId,
       petId: petId,
+      status: 'Available', // Status alanını ekleyin
     );
 
     // Firestore'a veri ekleme
@@ -183,11 +181,11 @@ class _ProductAddState extends State<ProductAdd> {
       'healthStatus': newPet.healthStatus,
       'healthCardImageUrl': newPet.healthCardImageUrl,
       'description': newPet.description,
-      'personalityTraits': newPet.personalityTraits,
       'animalType': newPet.animalType,
       'location': newPet.location,
       'userId': newPet.userId,
       'petId': newPet.petId,
+      'status': newPet.status, // Status alanını ekleyin
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -423,11 +421,11 @@ class PetData {
   final String healthStatus;
   final String healthCardImageUrl;
   final String description;
-  final String personalityTraits;
   final String animalType;
   final String location;
   final String userId;
   final String petId;
+  final String status; // Status alanını ekleyin
 
   PetData({
     required this.name,
@@ -438,11 +436,11 @@ class PetData {
     required this.healthStatus,
     required this.healthCardImageUrl,
     required this.description,
-    required this.personalityTraits,
     required this.animalType,
     required this.location,
     required this.userId,
     required this.petId,
+    required this.status, // Status alanını ekleyin
   });
 }
 

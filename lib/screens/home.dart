@@ -147,9 +147,17 @@ class _HomeState extends State<Home> {
               ),
             ),
           ),
-          title: Center(
-            child:
-                Text('Felvera', style: TextStyle(fontWeight: FontWeight.bold)),
+          title: Align(
+            alignment: Alignment.centerLeft, // Yazıyı sola kaydırır
+            child: Padding(
+              padding: EdgeInsets.only(
+                  left:
+                      115), // Sola biraz daha kaydırmak için padding ekleyebilirsiniz
+              child: Text(
+                'Felvera',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
           ),
         ),
         body: Column(
