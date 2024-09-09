@@ -242,17 +242,37 @@ class _LostAnimalDetailsScreenState extends State<LostAnimalDetailsScreen> {
             ),
           ),
           SizedBox(height: 16),
+          // Kodun mevcut haline ek olarak değiştirilecek kısım
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (currentUserId != null &&
                   currentUserName != null &&
                   receiverName != null) {
+                final conversationId =
+                    'unique-conversation-id-${currentUserId}-${widget.lostAnimal.userId}';
+
+                // Sohbetin daha önce var olup olmadığını kontrol edin
+                DocumentReference chatDocRef = FirebaseFirestore.instance
+                    .collection('chats')
+                    .doc(conversationId);
+
+                DocumentSnapshot chatSnapshot = await chatDocRef.get();
+
+                if (!chatSnapshot.exists) {
+                  // Eğer sohbet yoksa yeni bir sohbet oluşturun
+                  await chatDocRef.set({
+                    'participants': [currentUserId, widget.lostAnimal.userId],
+                    'lastMessage': '',
+                    'timestamp': FieldValue.serverTimestamp(),
+                  });
+                }
+
+                // ChatPage'e yönlendirin
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => ChatPage(
-                      conversationId:
-                          'unique-conversation-id-${currentUserId}-${widget.lostAnimal.userId}',
+                      conversationId: conversationId,
                       receiverId: widget.lostAnimal.userId,
                       receiverName: receiverName!,
                       senderName: currentUserName!,
@@ -270,10 +290,8 @@ class _LostAnimalDetailsScreenState extends State<LostAnimalDetailsScreen> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  Color(0xFFC478D1), // Uygulamanızın ana rengi (Mor tonları)
-              foregroundColor:
-                  Colors.white, // Yazı rengini beyaz olarak ayarladık
+              backgroundColor: Color(0xFFC478D1), // Ana renk (mor tonları)
+              foregroundColor: Colors.white, // Yazı rengi beyaz
               padding: EdgeInsets.symmetric(
                   vertical: 16.0, horizontal: 24.0), // Düğme içi boşluklar
               shape: RoundedRectangleBorder(

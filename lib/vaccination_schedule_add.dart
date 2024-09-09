@@ -1,8 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 
 class VaccinationScheduleAdd extends StatefulWidget {
@@ -16,13 +16,16 @@ class _VaccinationScheduleAddState extends State<VaccinationScheduleAdd> {
   DateTime? start;
   DateTime? end;
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _visitDateController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   String? _selectedAnimalId;
   List<String> _animalIds = [];
   List<String> _animalNames = [];
   List<String> _animalImageUrls = [];
-  final _formKey = GlobalKey<FormState>();
+  File? _selectedImage;
   bool _isLoading = false;
-  File? _newAnimalImage; // Yeni eklenen hayvan resmi için
+
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -54,29 +57,27 @@ class _VaccinationScheduleAddState extends State<VaccinationScheduleAdd> {
     }
   }
 
-  Future<String> _uploadImage(File image) async {
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<String?> _uploadImage(File image) async {
     try {
       final storageRef = FirebaseStorage.instance.ref();
-      final imageRef = storageRef
-          .child('vaccination_images/${DateTime.now().toIso8601String()}');
+      final fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      final imageRef = storageRef.child('vaccination_images/$fileName');
       final uploadTask = imageRef.putFile(image);
       final snapshot = await uploadTask.whenComplete(() {});
       final downloadUrl = await snapshot.ref.getDownloadURL();
       return downloadUrl;
     } catch (e) {
       print('Error uploading image: $e');
-      return '';
-    }
-  }
-
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _newAnimalImage = File(pickedFile.path);
-      });
+      return null;
     }
   }
 
@@ -89,8 +90,8 @@ class _VaccinationScheduleAddState extends State<VaccinationScheduleAdd> {
       if (user != null) {
         try {
           String? imageUrl;
-          if (_newAnimalImage != null) {
-            imageUrl = await _uploadImage(_newAnimalImage!);
+          if (_selectedImage != null) {
+            imageUrl = await _uploadImage(_selectedImage!);
           }
 
           await FirebaseFirestore.instance
@@ -101,7 +102,7 @@ class _VaccinationScheduleAddState extends State<VaccinationScheduleAdd> {
             'end': end,
             'animalId': _selectedAnimalId,
             'userId': user.uid,
-            'animalImageUrl': imageUrl, // Resim URL'sini ekleyin
+            'animalImageUrl': imageUrl,
           });
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -127,116 +128,105 @@ class _VaccinationScheduleAddState extends State<VaccinationScheduleAdd> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Aşı Takvimi Ekle"),
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Aşı takvimi bilgilerini doldurun.',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 147, 58, 142),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Aşı takvimi bilgilerini doldurun.',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromARGB(255, 147, 58, 142),
+                              ),
+                        ),
+                        SizedBox(height: 20),
+                        _buildDropdownField(
+                          label: 'Hayvan Seç (Opsiyonel)',
+                          value: _selectedAnimalId,
+                          items: _animalIds,
+                          itemNames: _animalNames,
+                          itemImageUrls: _animalImageUrls,
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedAnimalId = value;
+                            });
+                          },
+                        ),
+                        SizedBox(height: 20),
+                        _buildTextField(
+                          controller: _descriptionController,
+                          label: 'Açıklama',
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Açıklama girin';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 20),
+                        GestureDetector(
+                          onTap: _selectDateRange,
+                          child: AbsorbPointer(
+                            child: _buildTextField(
+                              controller: _visitDateController,
+                              label: 'Tarih Aralığı',
+                              hint: 'Başlangıç - Bitiş',
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Tarih aralığı girin';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        _buildImagePicker(),
+                      ],
                     ),
-              ),
-              const SizedBox(height: 20),
-              _buildDropdownField(
-                label: 'Hayvan Seç (Opsiyonel)',
-                value: _selectedAnimalId,
-                items: _animalIds,
-                itemNames: _animalNames,
-                itemImageUrls: _animalImageUrls,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedAnimalId = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _pickImage,
-                child: const Text("Yeni Hayvan Resmi Seç"),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Color.fromARGB(255, 147, 58, 142),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  textStyle: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-              if (_newAnimalImage != null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: Image.file(
-                    _newAnimalImage!,
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
                   ),
                 ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Açıklama'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Açıklama girin';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              Text(
-                start != null && end != null
-                    ? 'Başlangıç: ${_formatDate(start!)} \nBitiş: ${_formatDate(end!)}'
-                    : 'Tarihleri seçin',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () async {
-                  final result = await showDateRangePicker(
-                    context: context,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime(2100),
-                  );
-                  if (result != null) {
-                    setState(() {
-                      start = result.start;
-                      end = result.end;
-                    });
-                  }
-                },
-                child: const Text("Tarihleri Seç"),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Color.fromARGB(255, 147, 58, 142),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  textStyle: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
+                SizedBox(height: 20),
+                Center(
+                  child: _isLoading
+                      ? CircularProgressIndicator()
+                      : ElevatedButton(
+                          onPressed: _saveVaccinationSchedule,
+                          child: const Text('Kaydet'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 147, 58, 142),
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            textStyle: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                        ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              _isLoading
-                  ? Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      onPressed: _saveVaccinationSchedule,
-                      child: const Text("Kaydet"),
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Color.fromARGB(255, 147, 58, 142),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 12),
-                        textStyle: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -273,26 +263,124 @@ class _VaccinationScheduleAddState extends State<VaccinationScheduleAdd> {
             child: Row(
               children: [
                 itemImageUrls[index].isNotEmpty
-                    ? CircleAvatar(
-                        backgroundImage: NetworkImage(itemImageUrls[index]),
-                        radius: 20,
+                    ? Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Image.network(
+                          itemImageUrls[index],
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                        ),
                       )
-                    : const CircleAvatar(
-                        child: Icon(Icons.pets),
-                        radius: 20,
-                      ),
-                const SizedBox(width: 10),
+                    : SizedBox(width: 40, height: 40),
                 Text(itemNames[index]),
               ],
             ),
           );
-        }),
+        })
+          ..add(
+            DropdownMenuItem<String>(
+              value: 'custom',
+              child: Row(
+                children: [
+                  Icon(Icons.add_a_photo, color: Colors.grey[600]),
+                  SizedBox(width: 8),
+                  Text('Diğer Resim Ekle'),
+                ],
+              ),
+            ),
+          ),
         onChanged: onChanged,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Hayvan seçin';
+          }
+          return null;
+        },
       ),
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute}';
+  Widget _buildImagePicker() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: _pickImage,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              _selectedImage != null
+                  ? Image.file(
+                      _selectedImage!,
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    )
+                  : Icon(Icons.camera_alt, size: 50, color: Colors.grey),
+              SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  _selectedImage != null
+                      ? 'Resmi değiştirmek için dokunun'
+                      : 'Resim ekleyin',
+                  style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _selectDateRange() async {
+    final DateTime? pickedStart = await showDatePicker(
+      context: context,
+      initialDate: start ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (pickedStart != null && pickedStart != start) {
+      final DateTime? pickedEnd = await showDatePicker(
+        context: context,
+        initialDate: end ?? pickedStart,
+        firstDate: pickedStart,
+        lastDate: DateTime(2100),
+      );
+      if (pickedEnd != null && pickedEnd != end) {
+        setState(() {
+          start = pickedStart;
+          end = pickedEnd;
+          _visitDateController.text =
+              '${start?.toLocal().toString().split(' ')[0]} - ${end?.toLocal().toString().split(' ')[0]}';
+        });
+      }
+    }
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    String? hint,
+    required FormFieldValidator<String> validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      validator: validator,
+    );
   }
 }
