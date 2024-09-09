@@ -104,7 +104,59 @@ class LoginPage extends StatelessWidget {
   Widget _forgotPassword(BuildContext context) {
     return TextButton(
       onPressed: () {
-        // Implement forgot password functionality
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            final TextEditingController _emailController =
+                TextEditingController();
+
+            return AlertDialog(
+              title: const Text("Şifremi Unuttum"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      hintText: "E-Posta",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () async {
+                      String email = _emailController.text.trim();
+
+                      if (email.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text("Lütfen e-posta adresinizi girin")),
+                        );
+                        return;
+                      }
+
+                      try {
+                        await _auth.sendPasswordResetEmail(email: email);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content:
+                                  Text("Şifre sıfırlama e-postası gönderildi")),
+                        );
+                        Navigator.of(context)
+                            .pop(); // E-posta gönderildikten sonra dialog'ı kapat
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("E-posta gönderilemedi: $e")),
+                        );
+                      }
+                    },
+                    child: const Text("Gönder"),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
       },
       child: const Text(
         "Şifremi unuttum",
