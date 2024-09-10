@@ -25,6 +25,7 @@ dependencies:
   mailer: ^6.0.0
   uuid: ^3.0.0
   cached_network_image: ^3.2.0
+  shared_preferences: ^2.0.14
  
 
 dev_dependencies:

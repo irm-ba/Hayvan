@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:pet_adoption/sign_up.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class IntroScreen extends StatelessWidget {
   @override
@@ -15,61 +16,107 @@ class IntroScreen extends StatelessWidget {
         scrollPhysics: BouncingScrollPhysics(),
         pages: [
           PageViewModel(
-            titleWidget: Text(
-              "Felvera Evcil Hayvan Platformu",
-              style: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
+            titleWidget: Align(
+              alignment: Alignment.center,
+              child: Text(
+                "Felvera Evcil Hayvan Platformu",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(255, 147, 58, 142), // Başlık rengi
+                ),
+                textAlign: TextAlign.center, // Center text
               ),
             ),
-            body:
-                "Felvera'ya Hoş Geldiniz! Sevgi dolu dostlarımızı keşfedin ve hayatlarına neşe katın..",
-            image: Image.asset(
-              "assets/images/birinci.png",
-              height: 400,
-              width: 400,
+            bodyWidget: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  "assets/images/birinci.png",
+                  height: 400,
+                  width: 400,
+                ),
+                SizedBox(height: 20), // Add some spacing between image and text
+                Text(
+                  "Felvera'ya Hoş Geldiniz! Sevgi dolu dostlarımızı keşfedin ve hayatlarına neşe katın..",
+                  style: TextStyle(fontSize: 18),
+                  textAlign: TextAlign.center, // Center text
+                ),
+              ],
             ),
           ),
           PageViewModel(
-            titleWidget: Text(
-              "Felvera Evcil Hayvan Platformu",
-              style: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
+            titleWidget: Align(
+              alignment: Alignment.center,
+              child: Text(
+                "Felvera Evcil Hayvan Platformu",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(255, 147, 58, 142), // Başlık rengi
+                ),
+                textAlign: TextAlign.center, // Center text
               ),
             ),
-            body:
-                "Bizim amacımız sevimli dostlarımızın daha güzel bir yaşam sürmesi. bunu hep birlikte başarabiliriz.",
-            image: Image.asset(
-              "assets/images/ikinci.png",
-              height: 400,
-              width: 400,
+            bodyWidget: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  "assets/images/ikinci.png",
+                  height: 400,
+                  width: 400,
+                ),
+                SizedBox(height: 20), // Add some spacing between image and text
+                Text(
+                  "Bizim amacımız sevimli dostlarımızın daha güzel bir yaşam sürmesi. bunu hep birlikte başarabiliriz.",
+                  style: TextStyle(fontSize: 18),
+                  textAlign: TextAlign.center, // Center text
+                ),
+              ],
             ),
           ),
           PageViewModel(
-            titleWidget: Text(
-              "Felvera Evcil Hayvan Platformu",
-              style: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
+            titleWidget: Align(
+              alignment: Alignment.center,
+              child: Text(
+                "Felvera Evcil Hayvan Platformu",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(255, 147, 58, 142), // Başlık rengi
+                ),
+                textAlign: TextAlign.center, // Center text
               ),
             ),
-            body:
-                "Sokak hayvanlarına yuva, kayıp dostlara kavuşma, evcil hayvanlara sıcak bir yuva sunmak için hemen başlayın!",
-            image: Image.asset(
-              "assets/images/resim.png",
-              height: 400,
-              width: 400,
+            bodyWidget: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  "assets/images/resim.png",
+                  height: 400,
+                  width: 400,
+                ),
+                SizedBox(height: 20), // Add some spacing between image and text
+                Text(
+                  "Sokak hayvanlarına yuva, kayıp dostlara kavuşma, evcil hayvanlara sıcak bir yuva sunmak için hemen başlayın!",
+                  style: TextStyle(fontSize: 18),
+                  textAlign: TextAlign.center, // Center text
+                ),
+              ],
             ),
           ),
         ],
-        onDone: () {
+        onDone: () async {
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('hasSeenIntro', true); // Set flag to true
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => SignupPage()),
           );
         },
-        onSkip: () {
+        onSkip: () async {
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('hasSeenIntro', true); // Set flag to true
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => SignupPage()),
@@ -86,7 +133,10 @@ class IntroScreen extends StatelessWidget {
         ),
         next: Icon(Icons.arrow_forward, color: Color(0xFF6C63FF)),
         done: InkWell(
-          onTap: () {
+          onTap: () async {
+            final SharedPreferences prefs =
+                await SharedPreferences.getInstance();
+            await prefs.setBool('hasSeenIntro', true); // Set flag to true
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => SignupPage()),

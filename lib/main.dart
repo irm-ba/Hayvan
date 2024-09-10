@@ -1,28 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:pet_adoption/aboutpage.dart';
-import 'package:pet_adoption/constants.dart';
-import 'package:pet_adoption/deneme_service.dart';
-import 'package:pet_adoption/example.dart';
-import 'package:pet_adoption/login.dart';
+import 'package:flutter/services.dart';
 import 'package:pet_adoption/screens/IntroScreen.dart';
 import 'package:pet_adoption/screens/home.dart';
-import 'package:pet_adoption/sign_up.dart';
-import 'package:pet_adoption/widgets/healtbutton.dart';
-import 'firebase/auth.dart';
-import 'package:pet_adoption/widgets/HealthRecordAdd.dart';
-import 'package:flutter/services.dart';
+import 'package:pet_adoption/login.dart';
+import 'constants.dart';
+import 'AuthWarapper.dart'; // Yeni dosyanın import edilmesi
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await Firebase.initializeApp();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-    runApp(MyApp());
-  } catch (e) {
-    print("Error initializing Firebase: $e");
-  }
+  await Firebase.initializeApp();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -47,7 +36,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: LoginPage(),
+      home: AuthWrapper(), // AuthWrapper burada kullanılıyor
     );
   }
 }

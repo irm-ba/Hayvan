@@ -8,6 +8,7 @@ import 'package:pet_adoption/constants.dart';
 import 'package:pet_adoption/account.dart';
 import 'package:pet_adoption/models/pet_data.dart';
 import 'package:pet_adoption/aboutpage.dart';
+import 'package:pet_adoption/sign_out.dart';
 import 'package:pet_adoption/widgets/CustomBottomNavigationBar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pet_adoption/widgets/lostanimalpge.dart';
@@ -122,7 +123,8 @@ class _HomeState extends State<Home> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => LoginPage()),
+                          MaterialPageRoute(
+                              builder: (context) => SettingsPage()),
                         );
                       },
                     ),
